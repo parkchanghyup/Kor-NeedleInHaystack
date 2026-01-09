@@ -1,0 +1,58 @@
+{
+  "analysis_timestamp": "2026-01-09 16:33:55",
+  "source_directory": "C:\\Users\\parkchagnhyup\\Desktop\\temp\\gemma3_results_kor_3",
+  "total_tests": 84,
+  "models": [
+    "google/gemma-3-12b-it"
+  ],
+  "average_score": 9.833333333333334,
+  "median_score": 10.0,
+  "max_score": 10,
+  "min_score": 3,
+  "std_dev": 1.0735969643060046,
+  "average_duration": 2.2487025686672757,
+  "total_duration": 188.89101576805115,
+  "scores_by_context_length": {
+    "100000": 9,
+    "12000": 10,
+    "16000": 10,
+    "20000": 10,
+    "2000": 10,
+    "24000": 10,
+    "28000": 10,
+    "32000": 10,
+    "4000": 10,
+    "50000": 10,
+    "70000": 9,
+    "8000": 10
+  },
+  "scores_by_depth": {
+    "10.0": 10,
+    "1.0": 10,
+    "25.0": 10,
+    "50.0": 9.416666666666666,
+    "75.0": 10,
+    "90.0": 10,
+    "99.0": 9.416666666666666
+  },
+  "score_distribution": {
+    "완벽 (10점)": 82,
+    "우수 (8-9점)": 0,
+    "양호 (6-7점)": 0,
+    "보통 (4-5점)": 0,
+    "미흡 (2-3점)": 2,
+    "불량 (0-1점)": 0
+  },
+  "best_result": {
+    "score": 10,
+    "context_length": 100000,
+    "depth_percent": 10.0,
+    "duration": 13.387340784072876
+  },
+  "worst_result": {
+    "score": 3,
+    "context_length": 100000,
+    "depth_percent": 50.0,
+    "duration": 11.13190245628357
+  }
+}

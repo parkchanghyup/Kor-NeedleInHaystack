@@ -1,0 +1,12 @@
+{
+  "model": "google/gemma-3-12b-it",
+  "context_length": 12000,
+  "depth_percent": 90.0,
+  "version": 1,
+  "needle": "유니콘을 만나기위해서는 파란색 말의 꿈을 꾸어야합니다.",
+  "model_response": "파란색 말의 꿈을 꾸어야 합니다.",
+  "score": 10,
+  "test_duration_seconds": 0.5249876976013184,
+  "test_timestamp_utc": "2026-01-09 05:47:35+0000",
+  "file_name": "google_gemma-3-12b-it_len_12000_depth_90"
+}
