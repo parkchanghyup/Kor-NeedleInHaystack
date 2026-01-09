@@ -4,7 +4,7 @@
 
 ## 🎯 개요
 
-Needle In A Haystack 테스트는 다음과 같이 작동합니다:
+Needle In A Haystack 테스트는 다음과 같이 작동합니다.
 
 1. 긴 한국어 텍스트(Haystack)를 준비합니다
 2. 특정 정보(Needle)를 텍스트의 다양한 위치에 삽입합니다
@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 ### 2. 환경 변수 설정
 
-프로젝트 **최상단 폴더**에 `.env` 파일을 생성하세요:
+프로젝트 **최상단 폴더**에 `.env` 파일을 생성하세요.
 
 ```env
 # 필수: 사용하는 프로바이더에 따라 설정
@@ -54,19 +54,19 @@ python needle_test.py
 ### 특정 프로바이더 사용
 ```bash
 # OpenAI
-python needle_test.py --provider openai --model_name gpt-4o-mini
+python needle_test.py --provider openai --model_name gpt-5-mini
 
 # Anthropic Claude
-python needle_test.py --provider anthropic --model_name claude-3-5-sonnet-latest
+python needle_test.py --provider anthropic --model_name claude-4-5-sonnet
 
 # Google Gemini
-python needle_test.py --provider gemini --model_name gemini-2.0-flash-lite
+python needle_test.py --provider gemini --model_name gemini-2.5-flash-lite
 
 # OpenRouter
 python needle_test.py --provider openrouter --model_name google/gemma-3-12b-it
 
 # vLLM (로컬/원격 서버)
-python needle_test.py --provider vllm --model_name your-model-name
+python needle_test.py --provider vllm --model_name google/gemma-3-12b-it
 ```
 
 ### 다중 Needle 테스트
@@ -76,7 +76,7 @@ python needle_test.py --multi_needle true
 
 ## 📊 결과 분석
 
-테스트 완료 후 결과를 분석합니다:
+테스트 완료 후 결과를 분석합니다.
 
 ```bash
 python tools/analyze_results.py
@@ -94,7 +94,7 @@ python tools/analyze_results.py
 
 ### 결과 파일 예시
 
-`results_kor/` 디렉토리에 JSON 형식으로 저장됩니다:
+`results_kor/` 디렉토리에 JSON 형식으로 저장됩니다.
 
 ```json
 {
@@ -170,7 +170,7 @@ python needle_test.py \
 ```
 
 #### 특정 값만 테스트하기
-자동 생성 대신 직접 지정할 수도 있습니다:
+자동 생성 대신 직접 지정할 수도 있습니다.
 
 ```bash
 python needle_test.py \
