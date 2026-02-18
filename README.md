@@ -11,10 +11,51 @@ Needle In A Haystack 테스트는 다음과 같이 작동합니다.
 3. LLM에게 해당 정보를 찾도록 질문합니다
 4. LLM이 정보를 얼마나 정확하게 찾아내는지 평가합니다
 
-## 📦 설치
+## 🐳 Docker 사용 (권장)
 
+Docker를 사용하면 복잡한 환경 설정 없이 바로 테스트를 시작할 수 있습니다. 특히 그래프 생성 시 **한글 폰트 깨짐 문제를 자동으로 해결**해줍니다.
+
+### 1. 환경 변수 설정
+프로젝트 최상단 폴더에 `.env` 파일을 생성하세요.
+
+```env
+OPENAI_API_KEY=sk-...
+GOOGLE_API_KEY=...
+ANTHROPIC_API_KEY=...
+```
+
+### 2. 테스트 실행
+
+**통합 테스트 실행 (기본)**  
+- Gemini 모델(gemini-2.5-flash-lite + gemini-3-flash)을 사용하여 전체 기능을 빠르게 검증합니다.
 ```bash
-# 패키지 설치
+docker-compose run --rm needle-test
+```
+
+**특정 모델/옵션으로 직접 실행**  
+- 원하는 모델과 옵션을 지정하여 실행할 수도 있습니다.
+```bash
+# OpenAI GPT-5 테스트
+docker-compose run --rm needle-test python needle_test.py --provider openai --model_name gpt-5
+
+# Gemini 실행
+docker-compose run --rm needle-test python needle_test.py --provider gemini --model_name gemini-2.5-flash
+```
+
+### 3. 결과 분석
+```bash
+docker-compose run --rm needle-test python tools/analyze_results.py
+```
+결과는 로컬의 `results_kor/` 및 `analyze_results/` 폴더에 저장됩니다.
+
+---
+
+## 📦 로컬 설치 (직접 실행)
+
+Python 환경에서 직접 실행하려면 다음 단계를 따르세요.
+
+### 1. 패키지 설치
+```bash
 pip install -r requirements.txt
 ```
 
@@ -39,7 +80,6 @@ VLLM_API_BASE=http://localhost:8000/v1  # 선택사항, 기본값 사용 가능
 - Gemini는 `GOOGLE_API_KEY` 또는 `GEMINI_API_KEY` 사용 가능
 
 ### 3. 환경 확인
-
 ```bash
 python tools/setup_check.py
 ```
@@ -54,19 +94,19 @@ python needle_test.py
 ### 특정 프로바이더 사용
 ```bash
 # OpenAI
-python needle_test.py --provider openai --model_name gpt-5-mini
+python needle_test.py --provider openai --model_name gpt-4o-mini
 
 # Anthropic Claude
-python needle_test.py --provider anthropic --model_name claude-4-5-sonnet
+python needle_test.py --provider anthropic --model_name claude-3-5-sonnet-latest
 
 # Google Gemini
-python needle_test.py --provider gemini --model_name gemini-2.5-flash-lite
+python needle_test.py --provider gemini --model_name gemini-2.5-flash
 
 # OpenRouter
-python needle_test.py --provider openrouter --model_name google/gemma-3-12b-it
+python needle_test.py --provider openrouter --model_name google/gemma-2-9b-it
 
 # vLLM (로컬/원격 서버)
-python needle_test.py --provider vllm --model_name google/gemma-3-12b-it
+python needle_test.py --provider vllm --model_name google/gemma-2-9b-it
 ```
 
 ### 다중 Needle 테스트
@@ -76,7 +116,7 @@ python needle_test.py --multi_needle true
 
 ## 📊 결과 분석
 
-테스트 완료 후 결과를 분석합니다.
+테스트 완료 후 결과를 분석합니다. macOS 사용자의 경우 Docker 사용을 권장합니다 (한글 폰트 문제 해결).
 
 ```bash
 python tools/analyze_results.py
@@ -86,7 +126,7 @@ python tools/analyze_results.py
 
 히트맵으로 모델 성능을 시각화합니다:
 
-![Heatmap Example](analyze_results/heatmap.png)
+![Heatmap Example](assets/images/example_heatmap.png)
 
 - **X축**: 컨텍스트 길이 (토큰)
 - **Y축**: 문서 깊이 (%)
@@ -98,7 +138,7 @@ python tools/analyze_results.py
 
 ```json
 {
-  "model": "google/gemma-3-12b-it",
+  "model": "google/gemma-2-9b-it",
   "context_length": 8000,
   "depth_percent": 25.0,
   "version": 1,
@@ -178,17 +218,17 @@ python needle_test.py \
     --document_depth_percents "[0, 50, 100]"
 ```
 
-이 경우 정확히 **3 × 3 = 9번**만 테스트합니다.
+이 경우 정확히 **3 × 3 = 9번** 테스트합니다.
 
 ## 🔧 지원 프로바이더
 
-| 프로바이더 | 모델 예시 | 환경 변수 |
-|-----------|----------|----------|
-| OpenAI | gpt-4o-mini, gpt-4o | OPENAI_API_KEY |
-| Anthropic | claude-3-5-sonnet-latest | ANTHROPIC_API_KEY |
-| Gemini | gemini-2.5-flash-lite | GOOGLE_API_KEY |
-| OpenRouter | google/gemma-3-12b-it | OPENROUTER_API_KEY |
-| vLLM | google/gemma-3-12b-it | VLLM_API_BASE |
+| 프로바이더 | 모델 예시                    | 환경 변수 |
+|-----------|--------------------------|----------|
+| OpenAI | gpt-5-mini, gpt-5        | OPENAI_API_KEY |
+| Anthropic | claude-4-5-sonnet-latest | ANTHROPIC_API_KEY |
+| Gemini | gemini-2.5-flash         | GOOGLE_API_KEY |
+| OpenRouter | google/gemma-3-12b-it    | OPENROUTER_API_KEY |
+| vLLM | google/gemma-3-12b-it    | VLLM_API_BASE |
 
 ## 📁 프로젝트 구조
 
@@ -203,7 +243,9 @@ kor_version/
 │   └── setup_check.py      # 환경 확인
 ├── data/texts/             # 한국어 텍스트 데이터
 ├── results_kor/            # 테스트 결과 (자동 생성)
-└── analyze_results/        # 분석 결과 (자동 생성)
+├── analyze_results/        # 분석 결과 (자동 생성)
+├── Dockerfile              # Docker 이미지 빌드 설정
+└── docker-compose.yml      # Docker 실행 설정
 ```
 
 ## 📚 데이터 출처
@@ -214,12 +256,11 @@ kor_version/
 
 - **출처**: [세이노의 가르침](https://cafe.naver.com/saynoletter/1016)
 - **저자**: 세이노
-- **형식**: PDF (무료 공개)
+- **형식**: 텍스트 (PDF에서 추출)
 - **범위**: 11~300페이지
-- **추출 방법**: DeepSeek-OCR 모델을 사용한 OCR 텍스트 추출
 - **용도**: LLM의 긴 한국어 문맥 이해 능력 테스트를 위한 Haystack 텍스트
 
-이 pdf 파일은 네이버 카페 "세이노의 가르침"에서 무료로 공개된 자료입니다.
+이 데이터는 네이버 카페 "세이노의 가르침"(https://cafe.naver.com/saynoletter/1016)에서 무료로 공개된 자료를 바탕으로 합니다.
 
 ## 📈 평가 기준
 
