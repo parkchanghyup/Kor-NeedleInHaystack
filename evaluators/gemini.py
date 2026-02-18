@@ -92,25 +92,13 @@ class GeminiEvaluator(Evaluator):
             print(f"경고: 모델 응답이 에러입니다. 점수: 0")
             return 0
 
-        eval_prompt = f"""당신은 공정한 평가자입니다. 아래의 [질문]에 대해 [예측 답변]이 [참조 답변]의 핵심 정보를 정확히 포함하고 있는지 평가하세요.
+        # 평가 프롬프트 구성 (prompt.txt 템플릿 사용)
+        template = self.CRITERIA["accuracy"]
 
-[질문]
-{self.question_asked}
-
-[참조 답변 (Needle)]
-{self.true_answer}
-
-[예측 답변]
-{response}
-
-[평가 기준]
-{self.CRITERIA["accuracy"]}
-
----
-**지시사항:**
-1. 다른 설명이나 부연 설명은 절대 하지 마세요.
-2. 오직 해당되는 점수의 **숫자 하나만** (예: 10) 출력하세요.
-"""
+        # 템플릿 변수 치환
+        eval_prompt = template.format(
+            input=self.question_asked, reference=self.true_answer, prediction=response
+        )
 
         try:
             # 새로운 API 사용 (동기)
