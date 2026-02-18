@@ -1,0 +1,17 @@
+services:
+  needle-test:
+    build: .
+    volumes:
+      # 로컬 .env 파일을 컨테이너 내부에 읽기 전용으로 마운트 (API 키 전달)
+      - ./.env:/app/.env:ro
+      # 테스트 결과가 저장될 폴더 마운트 (데이터 영속성 보장)
+      - ./results_kor:/app/results_kor
+      # 컨텍스트 저장 폴더 마운트
+      - ./contexts_kor:/app/contexts_kor
+      # 분석 결과 저장 폴더 마운트
+      - ./analyze_results:/app/analyze_results
+    environment:
+      - PYTHONUNBUFFERED=1
+    # 기본 실행 명령: 헬프 메시지 출력
+    # 실행 시 command를 덮어써서 원하는 테스트를 수행할 수 있음
+    # 예: docker-compose run --rm needle-test python needle_test.py --provider gemini ...
