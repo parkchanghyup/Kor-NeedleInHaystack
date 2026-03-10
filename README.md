@@ -27,24 +27,24 @@ ANTHROPIC_API_KEY=...
 ### 2. 테스트 실행
 
 **통합 테스트 실행 (기본)**  
-- Gemini 모델(gemini-2.5-flash-lite + gemini-3-flash)을 사용하여 전체 기능을 빠르게 검증합니다.
+- Gemini 모델(gemini-2.5-flash-lite + gemini-3-flash-preview)을 사용하여 전체 기능을 빠르게 검증합니다.
 ```bash
-docker-compose run --rm needle-test
+docker compose run --rm needle-test test
 ```
 
 **특정 모델/옵션으로 직접 실행**  
 - 원하는 모델과 옵션을 지정하여 실행할 수도 있습니다.
 ```bash
 # OpenAI GPT-5 테스트
-docker-compose run --rm needle-test python needle_test.py --provider openai --model_name gpt-5
+docker compose run --rm needle-test python needle_test.py --provider openai --model_name gpt-5
 
 # Gemini 실행
-docker-compose run --rm needle-test python needle_test.py --provider gemini --model_name gemini-2.5-flash
+docker compose run --rm needle-test python needle_test.py --provider gemini --model_name gemini-2.5-flash
 ```
 
 ### 3. 결과 분석
 ```bash
-docker-compose run --rm needle-test python tools/analyze_results.py
+docker compose run --rm needle-test python tools/analyze_results.py
 ```
 결과는 로컬의 `results_kor/` 및 `analyze_results/` 폴더에 저장됩니다.
 
@@ -77,7 +77,7 @@ VLLM_API_BASE=http://localhost:8000/v1  # 선택사항, 기본값 사용 가능
 
 **참고:**
 - vLLM은 로컬 서버(`localhost:8000`)를 기본으로 사용합니다
-- Gemini는 `GOOGLE_API_KEY` 또는 `GEMINI_API_KEY` 사용 가능
+- Gemini는 `GOOGLE_API_KEY` 사용
 
 ### 3. 환경 확인
 ```bash
@@ -126,7 +126,7 @@ python tools/analyze_results.py
 
 히트맵으로 모델 성능을 시각화합니다:
 
-![Heatmap Example](assets/images/example_heatmap.png)
+> 분석 실행 후 `analyze_results/` 폴더에 히트맵 이미지가 생성됩니다.
 
 - **X축**: 컨텍스트 길이 (토큰)
 - **Y축**: 문서 깊이 (%)
@@ -157,6 +157,7 @@ python tools/analyze_results.py
 | `--provider` | LLM 프로바이더 | openai |
 | `--model_name` | 테스트할 모델 이름 | gpt-4o-mini |
 | `--evaluator` | 평가 모델 (openai, gemini) | openai |
+| `--evaluator_model_name` | 평가에 사용할 모델 이름 | gpt-4o-mini |
 | `--context_lengths_min` | 최소 컨텍스트 길이 (토큰) | 1000 |
 | `--context_lengths_max` | 최대 컨텍스트 길이 (토큰) | 16000 |
 | `--context_lengths_num_intervals` | 컨텍스트 길이 테스트 횟수 | 35 |
@@ -233,7 +234,6 @@ python needle_test.py \
 ## 📁 프로젝트 구조
 
 ```
-kor_version/
 ├── needle_test.py          # 메인 실행 스크립트
 ├── core/                   # 핵심 테스트 로직
 ├── providers/              # LLM 프로바이더
@@ -241,11 +241,16 @@ kor_version/
 ├── tools/                  # 유틸리티
 │   ├── analyze_results.py  # 결과 분석
 │   └── setup_check.py      # 환경 확인
+├── examples/               # 사용 예시 스크립트
 ├── data/texts/             # 한국어 텍스트 데이터
 ├── results_kor/            # 테스트 결과 (자동 생성)
+├── contexts_kor/           # 컨텍스트 저장 (자동 생성)
 ├── analyze_results/        # 분석 결과 (자동 생성)
+├── requirements.txt        # Python 의존성
+├── example.env             # 환경 변수 예시
 ├── Dockerfile              # Docker 이미지 빌드 설정
-└── docker-compose.yml      # Docker 실행 설정
+├── docker-compose.yml      # Docker 실행 설정
+└── entrypoint.sh           # Docker 엔트리포인트
 ```
 
 ## 📚 데이터 출처
