@@ -88,6 +88,7 @@ class LLMNeedleHaystackTesterKor:
     def __init__(self,
                  model_to_test: Optional[ModelProvider] = None,
                  evaluator: Optional[Evaluator] = None,
+                 evaluation_model: Optional[Evaluator] = None,
                  needle: Optional[str] = None,
                  haystack_dir: str = "data/texts",
                  retrieval_question: Optional[str] = None,
@@ -122,7 +123,7 @@ class LLMNeedleHaystackTesterKor:
         :param save_contexts: 컨텍스트를 파일로 저장할지 여부. 경고: 매우 길어질 수 있습니다! 기본값은 True.
         :param final_context_length_buffer: 출력 컨텍스트를 위해 입력 컨텍스트에서 남겨둘 여유 공간. 기본값 200 토큰
         :param context_lengths_min: 컨텍스트의 최소 길이. 기본값은 1000.
-        :param context_lengths_max: 컨텍스트의 최대 길이. 기본값은 200000.
+        :param context_lengths_max: 컨텍스트의 최대 길이. 기본값은 16000.
         :param context_lengths_num_intervals: 컨텍스트 길이의 간격 수. 기본값은 35.
         :param context_lengths: 컨텍스트의 길이들. 기본값은 None.
         :param document_depth_percent_min: 문서의 최소 깊이 퍼센트. 기본값은 0.
@@ -188,7 +189,7 @@ class LLMNeedleHaystackTesterKor:
         self.model_to_test = model_to_test
         self.model_name = self.model_to_test.model_name
         
-        self.evaluation_model = evaluator
+        self.evaluation_model = evaluation_model if evaluation_model is not None else evaluator
 
     def logistic(self, x: float, L: int = 100, x0: int = 50, k: float = .1) -> float:
         """로지스틱 함수를 사용하여 값을 변환합니다."""
@@ -272,17 +273,13 @@ class LLMNeedleHaystackTesterKor:
         if self.save_contexts:
             results['file_name'] = context_file_location
 
-            # 재테스트를 위해 컨텍스트를 파일로 저장
-            if not os.path.exists('contexts_kor'):
-                os.makedirs('contexts_kor')
+            os.makedirs('contexts_kor', exist_ok=True)
 
             with open(f'contexts_kor/{context_file_location}_context.txt', 'w', encoding='utf-8') as f:
                 f.write(context)
             
         if self.save_results:
-            # 재테스트를 위해 결과를 파일로 저장
-            if not os.path.exists('results_kor'):
-                os.makedirs('results_kor')
+            os.makedirs('results_kor', exist_ok=True)
 
             with open(f'results_kor/{context_file_location}_results.json', 'w', encoding='utf-8') as f:
                 json.dump(results, f, ensure_ascii=False, indent=2)
@@ -292,27 +289,29 @@ class LLMNeedleHaystackTesterKor:
 
     def result_exists(self, context_length: int, depth_percent: float) -> bool:
         """
-        결과가 이미 평가되었는지 확인
+        결과가 이미 평가되었는지 확인.
+        파일명 패턴으로 빠르게 후보를 찾고, version만 파일 내부에서 검증합니다.
         
         Returns:
             bool: 결과가 존재하면 True, 아니면 False
         """
-
-        results_dir = 'results_kor/'
+        results_dir = 'results_kor'
         if not os.path.exists(results_dir):
             return False
         
-        for filename in os.listdir(results_dir):
-            if filename.endswith('.json'):
-                with open(os.path.join(results_dir, filename), 'r', encoding='utf-8') as f:
-                    result = json.load(f)
-                    context_length_met = result['context_length'] == context_length
-                    depth_percent_met = result['depth_percent'] == depth_percent
-                    version_met = result.get('version', 1) == self.results_version
-                    model_met = result['model'] == self.model_name
-                    if context_length_met and depth_percent_met and version_met and model_met:
-                        return True
-        return False
+        safe_model_name = self.model_name.replace(".", "_").replace("/", "_").replace(":", "_")
+        expected_filename = f'{safe_model_name}_len_{context_length}_depth_{int(depth_percent)}_results.json'
+        filepath = os.path.join(results_dir, expected_filename)
+        
+        if not os.path.exists(filepath):
+            return False
+        
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                result = json.load(f)
+                return result.get('version', 1) == self.results_version
+        except (json.JSONDecodeError, KeyError):
+            return False
 
     async def generate_context(self, context_length: int, depth_percent: float) -> str:
         """
@@ -364,6 +363,7 @@ class LLMNeedleHaystackTesterKor:
         else:
             # needle을 삽입할 위치(토큰 기준) 가져오기
             insertion_point = int(len(tokens_context) * (depth_percent / 100))
+            original_insertion_point = insertion_point
 
             # tokens_new_context는 needle 이전의 토큰을 나타냄
             tokens_new_context = tokens_context[:insertion_point]
@@ -371,13 +371,16 @@ class LLMNeedleHaystackTesterKor:
             # needle을 문장 구분점에 배치하고 싶으므로 먼저 '.'가 어떤 토큰인지 확인
             period_tokens = self.model_to_test.encode_text_to_tokens('.')
             
-            # 그런 다음 첫 번째 마침표를 찾을 때까지 역방향으로 반복
+            # 첫 번째 마침표를 찾을 때까지 역방향으로 반복
+            # 마침표를 찾지 못하면 원래 삽입 지점을 사용
             while tokens_new_context and tokens_new_context[-1] not in period_tokens:
                 insertion_point -= 1
                 tokens_new_context = tokens_context[:insertion_point]
 
-            # 그곳에 도착하면 needle을 추가하고 나머지 컨텍스트를 다른 쪽 끝에 붙임
-            # 이제 haystack에 needle이 생겼습니다
+            if not tokens_new_context:
+                insertion_point = original_insertion_point
+                tokens_new_context = tokens_context[:insertion_point]
+
             tokens_new_context += tokens_needle + tokens_context[insertion_point:]
 
         # 문자열로 다시 변환하여 반환
@@ -396,7 +399,7 @@ class LLMNeedleHaystackTesterKor:
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
         while self.get_context_length_in_tokens(context) < max_context_length:
-            for file in glob.glob(os.path.join(base_dir, self.haystack_dir, "*.txt")):
+            for file in sorted(glob.glob(os.path.join(base_dir, self.haystack_dir, "*.txt"))):
                 with open(file, 'r', encoding='utf-8') as f:
                     context += f.read()
         return context

@@ -41,11 +41,20 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
                  needles: List[str] = None,
                  model_to_test: Optional[ModelProvider] = None,
                  evaluator: Optional[Evaluator] = None,
+                 evaluation_model: Optional[Evaluator] = None,
                  print_ongoing_status: bool = True,
                  eval_set: str = "multi-needle-eval-kor",
                  **kwargs):
 
-        super().__init__(*args, model_to_test=model_to_test, evaluator=evaluator, **kwargs)
+        # 다중 needle 테스트에서는 부모 클래스의 랜덤 needle 선택을 방지하기 위해
+        # needles의 첫 번째 항목을 needle로 전달
+        if needles and 'needle' not in kwargs:
+            kwargs.setdefault('needle', needles[0])
+        if needles and 'retrieval_question' not in kwargs:
+            kwargs.setdefault('retrieval_question', f"다음 정보들을 모두 찾아주세요: {', '.join(needles)}")
+
+        super().__init__(*args, model_to_test=model_to_test, evaluator=evaluator,
+                         evaluation_model=evaluation_model, **kwargs)
         self.needles = needles if needles is not None else []
         self.eval_set = eval_set
         self.insertion_percentages: List[float] = []
@@ -101,6 +110,7 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
             else:
                 # needle을 삽입할 위치(토큰 기준) 가져오기
                 insertion_point = int(len(tokens_context) * (depth_percent / 100))
+                original_insertion_point = insertion_point
 
                 # tokens_new_context는 needle 이전의 토큰을 나타냄
                 tokens_new_context = tokens_context[:insertion_point]
@@ -108,12 +118,15 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
                 # needle을 문장 구분점에 배치하고 싶으므로 먼저 '.'가 어떤 토큰인지 확인
                 period_tokens = self.model_to_test.encode_text_to_tokens('.')
                 
-                # 그런 다음 첫 번째 마침표를 찾을 때까지 역방향으로 반복
+                # 첫 번째 마침표를 찾을 때까지 역방향으로 반복
                 while tokens_new_context and tokens_new_context[-1] not in period_tokens:
                     insertion_point -= 1
                     tokens_new_context = tokens_context[:insertion_point]
-                    
-                # 찾은 위치의 컨텍스트에 needle 삽입
+                
+                # 마침표를 찾지 못하면 원래 삽입 지점을 사용
+                if not tokens_new_context:
+                    insertion_point = original_insertion_point
+
                 tokens_context = tokens_context[:insertion_point] + tokens_needle + tokens_context[insertion_point:]
 
                 # 로그 
@@ -225,17 +238,13 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
         if self.save_contexts:
             results['file_name'] = context_file_location
 
-            # 재테스트를 위해 컨텍스트를 파일로 저장
-            if not os.path.exists('contexts_kor'):
-                os.makedirs('contexts_kor')
+            os.makedirs('contexts_kor', exist_ok=True)
 
             with open(f'contexts_kor/{context_file_location}_context.txt', 'w', encoding='utf-8') as f:
                 f.write(context)
             
         if self.save_results:
-            # 재테스트를 위해 결과를 파일로 저장
-            if not os.path.exists('results_kor'):
-                os.makedirs('results_kor')
+            os.makedirs('results_kor', exist_ok=True)
 
             with open(f'results_kor/{context_file_location}_results.json', 'w', encoding='utf-8') as f:
                 json.dump(results, f, ensure_ascii=False, indent=2)

@@ -194,14 +194,11 @@ def main():
     
     if args.multi_needle:
         print("다중 needle 테스팅")
-        args.evaluator = get_evaluator(args)
+        args.evaluation_model = get_evaluator(args)
         tester = LLMMultiNeedleHaystackTesterKor(**args.__dict__)
     else: 
         print("단일 needle 테스팅")
-        # 단일 needle의 경우, needle과 retrieval_question이 None이면
-        # tester 내부에서 랜덤으로 선택됨
-        # 먼저 None 값으로 evaluator 생성
-        args.evaluator = get_evaluator(args)
+        args.evaluation_model = get_evaluator(args)
         tester = LLMNeedleHaystackTesterKor(**args.__dict__)
         # tester가 생성된 후 실제 needle과 question으로 evaluator의 값 업데이트
         tester.evaluation_model.true_answer = tester.needle
