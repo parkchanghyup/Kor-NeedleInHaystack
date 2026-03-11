@@ -3,6 +3,7 @@ OpenAI 모델을 사용한 응답 평가자
 """
 
 import os
+import re
 from pathlib import Path
 
 from .evaluator import Evaluator
@@ -111,12 +112,7 @@ class OpenAIEvaluator(Evaluator):
             }
         )
 
-        # 응답에서 숫자만 추출
-
         score_text = result.content.strip()
-        # 숫자만 추출 (1, 3, 5, 7, 10 중 하나)
-        import re
-
         numbers = re.findall(r"\b(1|3|5|7|10)\b", score_text)
         if numbers:
             return int(numbers[0])

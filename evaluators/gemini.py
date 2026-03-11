@@ -111,15 +111,11 @@ class GeminiEvaluator(Evaluator):
             )
             score_text = result.text.strip()
 
-            # 응답에서 숫자만 추출 (더 유연한 방식 사용)
-            # 예: "점수는 10점입니다." -> 10 추출
-            match = re.search(r"(\d+)", score_text)
-            if match:
-                score = int(match.group(1))
-                # 1~10 범위로 보정 (Gemini가 8, 9점 등을 줄 수도 있으므로)
-                return max(1, min(10, score))
+            # prompt.txt 기준에 맞는 점수(1, 3, 5, 7, 10)만 추출
+            numbers = re.findall(r"\b(1|3|5|7|10)\b", score_text)
+            if numbers:
+                return int(numbers[0])
             else:
-                # 숫자를 찾지 못한 경우 기본값 5 반환
                 print(f"경고: 점수를 파싱할 수 없습니다. 응답: {score_text}")
                 return 5
 
