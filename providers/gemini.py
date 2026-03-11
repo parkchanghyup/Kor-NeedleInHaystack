@@ -44,8 +44,17 @@ class Gemini(ModelProvider):
         # 새로운 google.genai API 사용
         self.client = genai.Client(api_key=api_key)
 
-        # 다른 벤치마크와의 일관성을 위해 tiktoken 사용 (OpenAI 표준)
+        # 주의: Gemini 모델의 실제 토크나이저와 cl100k_base(OpenAI)는 한국어에서
+        # 토큰 수 차이가 클 수 있습니다. 이로 인해 컨텍스트 길이 계산이 부정확할 수 있으나,
+        # google-genai API가 토큰 ID 리스트 반환을 지원하지 않아 encode/decode 인터페이스를
+        # 유지하기 위해 tiktoken을 근사치로 사용합니다.
         self.tokenizer = tiktoken.get_encoding("cl100k_base")
+        import warnings
+        warnings.warn(
+            "Gemini 프로바이더는 tiktoken(cl100k_base)을 근사 토크나이저로 사용합니다. "
+            "한국어 텍스트에서 실제 Gemini 토큰 수와 차이가 있을 수 있습니다.",
+            stacklevel=2
+        )
 
     async def evaluate_model(self, prompt: str) -> str:
         """
