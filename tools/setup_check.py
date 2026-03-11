@@ -101,7 +101,7 @@ def check_korean_texts():
     
     if len(text_files) == 0:
         print(f"   ❌ data/texts 디렉토리에 텍스트 파일이 없습니다")
-        print(f"      tools/processing_pdf.py와 tools/extract_text.py를 실행하여 텍스트를 추출하세요")
+        print(f"      data/texts/ 디렉토리에 한국어 텍스트 파일(.txt)을 추가하세요")
         return False
     
     print(f"   ✅ {len(text_files)}개의 한국어 텍스트 파일 발견")
@@ -167,9 +167,9 @@ def main():
     if all_passed:
         print("\n🎉 모든 확인이 완료되었습니다!")
         print("다음 명령으로 테스트를 시작할 수 있습니다:")
-        print("\n  python examples/example_single_needle.py")
+        print("\n  python needle_test.py")
         print("  또는")
-        print("  python run_kor.py")
+        print("  python examples/example_single_needle.py")
     else:
         print("\n⚠️  일부 확인이 실패했습니다.")
         print("위의 오류 메시지를 확인하고 문제를 해결한 후 다시 시도하세요.")
