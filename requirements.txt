@@ -19,9 +19,5 @@ langchain-core>=0.1.0
 # Anthropic 프로바이더 (Claude 모델 사용 시)
 anthropic>=0.18.0
 
-# Cohere 프로바이더 (Command 모델 사용 시)
-cohere>=5.0.0
-langchain-cohere>=0.1.0
-
 # Google Gemini 프로바이더/Evaluator
 google-genai>=0.3.0
