@@ -61,12 +61,14 @@ class Anthropic(ModelProvider):
             self.tokenizer = tiktoken.get_encoding("cl100k_base")
             self.use_anthropic_tokenizer = False
 
-    async def evaluate_model(self, prompt: str) -> str:
+    SYSTEM_PROMPT = "You are a helpful AI bot that answers questions for a user. Keep your response short and direct"
+
+    async def evaluate_model(self, prompt: dict) -> str:
         """
         Anthropic Messages API를 사용하여 모델 평가
         
         Args:
-            prompt: 평가할 프롬프트 (문자열)
+            prompt: generate_prompt()에서 반환된 딕셔너리 (system, messages 포함)
             
         Returns:
             str: 모델의 응답
@@ -74,38 +76,32 @@ class Anthropic(ModelProvider):
         try:
             response = await self.model.messages.create(
                 model=self.model_name,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
+                system=prompt["system"],
+                messages=prompt["messages"],
                 **self.model_kwargs
             )
             return response.content[0].text
         except Exception as e:
             return f"Error: {str(e)}"
 
-    def generate_prompt(self, context: str, retrieval_question: str) -> str:
+    def generate_prompt(self, context: str, retrieval_question: str) -> dict:
         """
-        컨텍스트와 질문으로 프롬프트 생성
+        컨텍스트와 질문으로 Anthropic 형식의 프롬프트 생성
         
         Args:
             context: 배경 컨텍스트
             retrieval_question: 검색 질문
             
         Returns:
-            str: 생성된 프롬프트
+            dict: system 프롬프트와 messages를 포함하는 딕셔너리
         """
-        return f"""You are a helpful AI bot that answers questions for a user. Keep your response short and direct.
-
-Context:
-{context}
-
-Question:
-{retrieval_question}
-
-Don't give information outside the document or repeat your findings."""
+        return {
+            "system": self.SYSTEM_PROMPT,
+            "messages": [
+                {"role": "user", "content": context},
+                {"role": "user", "content": f"{retrieval_question} Don't give information outside the document or repeat your findings"}
+            ]
+        }
 
     def encode_text_to_tokens(self, text: str) -> list[int]:
         """텍스트를 토큰으로 인코딩"""
