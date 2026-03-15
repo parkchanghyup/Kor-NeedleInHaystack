@@ -84,7 +84,37 @@ VLLM_API_BASE=http://localhost:8000/v1  # 선택사항, 기본값 사용 가능
 python tools/setup_check.py
 ```
 
-## 🚀 빠른 시작
+## 🌐 웹 어플리케이션(UI) 사용 가이드
+
+명령어 기반의 CLI 대신, 브라우저에서 편리하게 테스트 파라미터를 설정하고 실행 결과를 실시간으로 모니터링할 수 있는 UI 대시보드가 제공됩니다.
+
+### 1. 백엔드(FastAPI) 시작
+프로젝트 최상단 폴더에서 테스트 실행 요청을 수신하고 결과를 처리할 백엔드 서버를 띄웁니다.
+```bash
+# 관련 패키지 설치 (없는 경우)
+pip install fastapi uvicorn pydantic
+
+# 백엔드 서버 실행
+uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
+```
+
+### 2. 프론트엔드(React) 시작
+새로운 터미널 창을 열고 `web` 폴더로 이동하여 프론트엔드 환경을 세팅하고 실행합니다.
+```bash
+cd web
+
+# 관련 패키지 설치
+npm install
+
+# 프론트엔드 서버 실행
+npm run dev
+```
+
+이제 웹 브라우저를 열고 `http://localhost:5173/` 에 접속하여 직관적이고 멋진 다크 테마 방식의 **N.I.H. Kor Terminal** 대시보드를 바로 사용할 수 있습니다!
+
+---
+
+## 🚀 빠른 시작 (CLI)
 
 ### 기본 실행
 ```bash
