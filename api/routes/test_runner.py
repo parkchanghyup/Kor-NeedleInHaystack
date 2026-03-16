@@ -1,6 +1,10 @@
 import asyncio
 import uuid
 import time
+import json
+import os
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, Field
@@ -47,6 +51,12 @@ router = APIRouter()
 # 전역 상태 저장소 (메모리) - 실제 프로덕션에선 Redis/DB 사용 권장
 tasks_store: Dict[str, Dict[str, Any]] = {}
 
+# 이력 저장 디렉토리
+HISTORY_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "history"
+HISTORY_DIR.mkdir(parents=True, exist_ok=True)
+
+KST = timezone(timedelta(hours=9))
+
 class TestRunRequest(BaseModel):
     provider: str = Field(default="openai")
     evaluator: str = Field(default="openai")
@@ -61,6 +71,40 @@ class TestRunRequest(BaseModel):
     document_depth_percent_min: int = Field(default=0)
     document_depth_percent_max: int = Field(default=100)
     document_depth_percent_intervals: int = Field(default=5)
+
+def save_history(task_id: str, req: TestRunRequest, results: list, time_elapsed: float):
+    """테스트 결과를 JSON 파일로 영구 저장"""
+    now = datetime.now(KST)
+    history_entry = {
+        "id": task_id,
+        "timestamp": now.isoformat(),
+        "config": {
+            "provider": req.provider,
+            "evaluator": req.evaluator,
+            "model_name": req.model_name,
+            "evaluator_model_name": req.evaluator_model_name,
+            "multi_needle": req.multi_needle,
+            "context_lengths_min": req.context_lengths_min,
+            "context_lengths_max": req.context_lengths_max,
+            "context_lengths_num_intervals": req.context_lengths_num_intervals,
+            "document_depth_percent_min": req.document_depth_percent_min,
+            "document_depth_percent_max": req.document_depth_percent_max,
+            "document_depth_percent_intervals": req.document_depth_percent_intervals,
+        },
+        "results": results,
+        "time_elapsed": time_elapsed,
+        "total_tests": len(results) if results else 0,
+    }
+    
+    # 파일명: 타임스탬프_모델명_taskid(앞8자리).json
+    safe_model = req.model_name.replace("/", "_").replace(" ", "_")
+    filename = f"{now.strftime('%Y%m%d_%H%M%S')}_{safe_model}_{task_id[:8]}.json"
+    filepath = HISTORY_DIR / filename
+    
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(history_entry, f, ensure_ascii=False, indent=2)
+    
+    return filepath
 
 def get_model_provider(provider: str, model_name: str):
     provider = provider.lower()
@@ -132,6 +176,12 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
         tasks_store[task_id]["message"] = "테스트가 완료되었습니다."
         tasks_store[task_id]["detailed_results"] = results
         tasks_store[task_id]["time_elapsed"] = elapsed
+        
+        # 이력 파일로 영구 저장
+        try:
+            save_history(task_id, req, results, elapsed)
+        except Exception as save_err:
+            print(f"이력 저장 실패: {save_err}")
 
     except Exception as e:
         tasks_store[task_id]["status"] = "failed"
@@ -187,3 +237,73 @@ async def get_test_results(task_id: str):
         "results": task.get("detailed_results", []),
         "time_elapsed": task.get("time_elapsed", 0)
     }
+
+
+# === 이력 관리 API ===
+
+@router.get("/history")
+async def list_history():
+    """
+    저장된 테스트 이력 목록을 반환합니다. (최신순 정렬)
+    """
+    history_list = []
+    for filepath in sorted(HISTORY_DIR.glob("*.json"), reverse=True):
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            # 목록에는 결과 상세 데이터를 제외하고 요약만 반환
+            total = data.get("total_tests", 0)
+            results = data.get("results", [])
+            perfect = sum(1 for r in results if r.get("score", 0) >= 10) if results else 0
+            history_list.append({
+                "id": data.get("id", ""),
+                "filename": filepath.name,
+                "timestamp": data.get("timestamp", ""),
+                "model_name": data.get("config", {}).get("model_name", "unknown"),
+                "provider": data.get("config", {}).get("provider", "unknown"),
+                "evaluator": data.get("config", {}).get("evaluator", "unknown"),
+                "total_tests": total,
+                "accuracy": round((perfect / total) * 100) if total > 0 else 0,
+                "time_elapsed": data.get("time_elapsed", 0),
+                "multi_needle": data.get("config", {}).get("multi_needle", False),
+            })
+        except Exception as e:
+            print(f"이력 파일 읽기 오류 ({filepath.name}): {e}")
+            continue
+    
+    return {"history": history_list, "total": len(history_list)}
+
+
+@router.get("/history/{history_id}")
+async def get_history_detail(history_id: str):
+    """
+    특정 이력의 상세 결과를 반환합니다.
+    """
+    for filepath in HISTORY_DIR.glob("*.json"):
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if data.get("id") == history_id:
+                return data
+        except Exception:
+            continue
+    
+    raise HTTPException(status_code=404, detail="해당 이력을 찾을 수 없습니다.")
+
+
+@router.delete("/history/{history_id}")
+async def delete_history(history_id: str):
+    """
+    특정 이력을 삭제합니다.
+    """
+    for filepath in HISTORY_DIR.glob("*.json"):
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if data.get("id") == history_id:
+                os.remove(filepath)
+                return {"message": "이력이 삭제되었습니다.", "id": history_id}
+        except Exception:
+            continue
+    
+    raise HTTPException(status_code=404, detail="해당 이력을 찾을 수 없습니다.")
