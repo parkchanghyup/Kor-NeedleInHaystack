@@ -34,6 +34,7 @@ Needle In A Haystack 테스트 실행 스크립트
 지원 Evaluator:
     - openai: OpenAI 모델로 평가
     - gemini: Gemini 모델로 평가
+    - openrouter: OpenRouter API를 통한 평가
 """
 
 from dataclasses import dataclass, field
@@ -51,6 +52,11 @@ try:
     from evaluators import GeminiEvaluator
 except ImportError:
     GeminiEvaluator = None
+
+try:
+    from evaluators import OpenRouterEvaluator
+except ImportError:
+    OpenRouterEvaluator = None
 
 try:
     from providers import Anthropic
@@ -179,6 +185,12 @@ def get_evaluator(args: CommandArgs, needle=None, retrieval_question=None) -> Ev
             return GeminiEvaluator(model_name=args.evaluator_model_name,
                                    question_asked=question,
                                    true_answer=true_answer)
+        case "openrouter":
+            if OpenRouterEvaluator is None:
+                raise ValueError("OpenRouter evaluator를 사용하려면 'langchain-openai' 패키지를 설치해야 합니다.")
+            return OpenRouterEvaluator(model_name=args.evaluator_model_name,
+                                       question_asked=question,
+                                       true_answer=true_answer)
         case _:
             raise ValueError(f"유효하지 않은 evaluator: {args.evaluator}")
 

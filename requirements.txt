@@ -21,3 +21,8 @@ anthropic>=0.18.0
 
 # Google Gemini 프로바이더/Evaluator
 google-genai>=0.3.0
+
+# 웹 API 서버
+fastapi>=0.115.0
+uvicorn>=0.34.0
+pydantic>=2.0.0
