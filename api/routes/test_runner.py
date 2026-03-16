@@ -18,6 +18,11 @@ except ImportError:
     GeminiEvaluator = None
 
 try:
+    from evaluators import OpenRouterEvaluator
+except ImportError:
+    OpenRouterEvaluator = None
+
+try:
     from providers import Anthropic
 except ImportError:
     Anthropic = None
@@ -78,6 +83,8 @@ def get_evaluator_instance(evaluator: str, model_name: str):
         return OpenAIEvaluator(model_name=model_name, question_asked="temp", true_answer="temp")
     elif evaluator == "gemini" and GeminiEvaluator:
         return GeminiEvaluator(model_name=model_name, question_asked="temp", true_answer="temp")
+    elif evaluator == "openrouter" and OpenRouterEvaluator:
+        return OpenRouterEvaluator(model_name=model_name, question_asked="temp", true_answer="temp")
     raise ValueError(f"지원하지 않는 Evaluator: {evaluator}")
 
 

@@ -52,6 +52,7 @@ export default function TestConfigForm({ onStart, isPending }) {
               <option value="openai">OpenAI</option>
               <option value="anthropic">Anthropic</option>
               <option value="gemini">Google Gemini</option>
+              <option value="openrouter">OpenRouter</option>
               <option value="vllm">vLLM</option>
             </select>
           </div>
@@ -64,6 +65,36 @@ export default function TestConfigForm({ onStart, isPending }) {
               id="model_name"
               name="model_name"
               value={config.model_name}
+              onChange={handleChange}
+              disabled={isPending}
+              placeholder="e.g. gpt-4o-mini"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="evaluator">Evaluator Provider</label>
+            <select
+              className="form-select"
+              id="evaluator"
+              name="evaluator"
+              value={config.evaluator}
+              onChange={handleChange}
+              disabled={isPending}
+            >
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="openrouter">OpenRouter</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="evaluator_model_name">Evaluator Model Name</label>
+            <input
+              type="text"
+              className="form-input"
+              id="evaluator_model_name"
+              name="evaluator_model_name"
+              value={config.evaluator_model_name}
               onChange={handleChange}
               disabled={isPending}
               placeholder="e.g. gpt-4o-mini"
