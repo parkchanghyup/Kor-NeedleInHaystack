@@ -250,3 +250,219 @@ main {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* === 탭 네비게이션 === */
+.header-nav {
+  display: flex;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 100px;
+  padding: 0.25rem;
+  border: 1px solid var(--border-glass);
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1.2rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: 100px;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  letter-spacing: 0.06em;
+}
+
+.nav-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-tab--active {
+  color: #000;
+  background: var(--accent-primary);
+  box-shadow: 0 0 15px var(--accent-glow-strong);
+}
+
+.nav-tab--active:hover {
+  color: #000;
+  background: var(--accent-primary);
+}
+
+
+/* === 이력 컨테이너 === */
+.history-container {
+  flex: 1;
+}
+
+
+/* === 이력 목록 === */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+
+/* === 이력 카드 === */
+.history-card {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+.history-card:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.history-card__accent {
+  width: 4px;
+  min-height: 100%;
+  flex-shrink: 0;
+  transition: width 0.25s ease;
+}
+
+.history-card:hover .history-card__accent {
+  width: 6px;
+}
+
+.history-card__body {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.history-card__model {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-card__stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+
+.history-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.history-stat__value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.history-stat__label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.history-card__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 0.6rem;
+}
+
+
+/* === 이력 태그 === */
+.history-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.15rem 0.5rem;
+  border-radius: 100px;
+  letter-spacing: 0.03em;
+}
+
+.history-tag--accent {
+  color: var(--accent-primary);
+  border-color: rgba(0, 240, 181, 0.3);
+  background: rgba(0, 240, 181, 0.06);
+}
+
+
+/* === 아이콘 버튼 === */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-glass);
+  color: var(--text-muted);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-icon--sm {
+  width: 30px;
+  height: 30px;
+}
+
+.btn-icon--danger {
+  color: #f82572;
+  border-color: rgba(248, 37, 114, 0.3);
+  background: rgba(248, 37, 114, 0.08);
+}
+
+.btn-icon--danger:hover {
+  background: rgba(248, 37, 114, 0.2);
+  color: #ff5a93;
+}
+
+
+/* === 반응형: 이력 카드 === */
+@media (max-width: 768px) {
+  .history-card__top {
+    flex-direction: column;
+  }
+
+  .history-card__stats {
+    width: 100%;
+    justify-content: space-around;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .header-nav {
+    order: -1;
+  }
+}
