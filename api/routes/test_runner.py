@@ -151,7 +151,7 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
             "document_depth_percent_max": req.document_depth_percent_max,
             "document_depth_percent_intervals": req.document_depth_percent_intervals,
             "print_ongoing_status": False,
-            "save_results": True,
+            "save_results": False,  # 웹 환경에서는 data/history에 별도 저장하므로 results_kor 저장 불필요
             "save_contexts": False, # 웹 환경에서는 용량 고려하여 False 기본값
         }
 
