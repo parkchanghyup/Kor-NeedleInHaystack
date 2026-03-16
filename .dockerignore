@@ -1,14 +1,14 @@
-# Git 관련 파일 및 폴더
+# Git
 .git
 .gitignore
 
-# 환경 설정 및 비밀 정보 (매우 중요!)
+# 환경 설정 및 비밀 정보
 .env
 .env.local
 .env.*
 !.env.example
 
-# Python 가상 환경 및 캐시
+# Python 캐시
 __pycache__
 *.pyc
 *.pyo
@@ -17,23 +17,25 @@ __pycache__
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
 
-# 테스트 결과 및 데이터 (Docker 볼륨으로 마운트하여 사용 권장)
+# 테스트 결과 (Docker 볼륨으로 마운트)
 results_kor/
 contexts_kor/
 analyze_results/
 trash/
 
-# IDE 설정 파일
+# 프론트엔드 (별도 Dockerfile로 빌드)
+web/
+
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# macOS 시스템 파일
+# OS
 .DS_Store
+Thumbs.db
 
-# 로그 파일
+# 로그
 *.log

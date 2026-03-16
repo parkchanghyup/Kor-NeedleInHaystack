@@ -14,12 +14,12 @@ function App() {
   const handleStartTest = async (config) => {
     try {
       setTaskStatus('queued');
-      const response = await fetch('http://localhost:8080/api/test/run', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/test/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)
       });
-      
+
       const data = await response.json();
       if (data.task_id) {
         setTaskId(data.task_id);
@@ -54,8 +54,8 @@ function App() {
 
       <main>
         {/* Left Sidebar: Config Form */}
-        <motion.section 
-          className="glass-panel" 
+        <motion.section
+          className="glass-panel"
           style={{ padding: '2rem', height: 'fit-content' }}
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -65,10 +65,10 @@ function App() {
             <FileText size={20} color="var(--accent-secondary)" />
             <h2 style={{ fontSize: '1.2rem', color: '#fff' }}>Test Parameters</h2>
           </div>
-          
-          <TestConfigForm 
-            onStart={handleStartTest} 
-            isPending={taskStatus === 'queued' || taskStatus === 'running'} 
+
+          <TestConfigForm
+            onStart={handleStartTest}
+            isPending={taskStatus === 'queued' || taskStatus === 'running'}
           />
         </motion.section>
 
@@ -83,8 +83,8 @@ function App() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.4 }}
               >
-                <ProgressMonitor 
-                  taskId={taskId} 
+                <ProgressMonitor
+                  taskId={taskId}
                   status={taskStatus}
                   setStatus={setTaskStatus}
                   setMessage={setTaskMessage}
@@ -120,29 +120,29 @@ function App() {
                 </button>
               </motion.div>
             )}
-            
+
             {taskStatus === 'idle' && (
-               <motion.div
-               key="idle"
-               className="glass-panel"
-               style={{ 
-                 display: 'flex', 
-                 flexDirection: 'column',
-                 alignItems: 'center', 
-                 justifyContent: 'center',
-                 height: '100%',
-                 minHeight: '400px',
-                 opacity: 0.5
-               }}
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 0.4 }}
-               exit={{ opacity: 0 }}
-             >
-               <Activity size={48} strokeWidth={1} style={{ marginBottom: '1rem', color: 'var(--text-muted)' }} />
-               <p className="mono" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                 AWAITING TEST INITIALIZATION...
-               </p>
-             </motion.div>
+              <motion.div
+                key="idle"
+                className="glass-panel"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  minHeight: '400px',
+                  opacity: 0.5
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.4 }}
+                exit={{ opacity: 0 }}
+              >
+                <Activity size={48} strokeWidth={1} style={{ marginBottom: '1rem', color: 'var(--text-muted)' }} />
+                <p className="mono" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  AWAITING TEST INITIALIZATION...
+                </p>
+              </motion.div>
             )}
           </AnimatePresence>
         </section>

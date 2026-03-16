@@ -3,43 +3,43 @@ import { motion } from 'framer-motion';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function ProgressMonitor({ taskId, status, setStatus, setMessage, setResults, message }) {
-  
+
   useEffect(() => {
     let intervalId;
-    
+
     const checkStatus = async () => {
       try {
-         // 폴링 엔드포인트 호출
-        const res = await fetch(`http://localhost:8080/api/test/status/${taskId}`);
+        // 폴링 엔드포인트 호출
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/test/status/${taskId}`);
         if (!res.ok) throw new Error('Network error');
-        
+
         const data = await res.json();
         setStatus(data.status);
         setMessage(data.message);
-        
+
         // 작업이 완료되었거나 실패한 경우 폴링 중단 및 결과 fetch 시도
         if (data.status === 'completed' || data.status === 'failed') {
           clearInterval(intervalId);
-          
+
           if (data.status === 'completed') {
-             fetchResults();
+            fetchResults();
           }
         }
       } catch (error) {
-         console.error("Status Check Error:", error);
+        console.error("Status Check Error:", error);
       }
     };
 
     const fetchResults = async () => {
-        try {
-            const res = await fetch(`http://localhost:8080/api/test/results/${taskId}`);
-            const data = await res.json();
-            if (data.results) {
-               setResults(data);
-            }
-        } catch(error) {
-            console.error("Result Fetch Error:", error);
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/test/results/${taskId}`);
+        const data = await res.json();
+        if (data.results) {
+          setResults(data);
         }
+      } catch (error) {
+        console.error("Result Fetch Error:", error);
+      }
     }
 
     // 2초 간격 폴링
@@ -55,9 +55,9 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
 
   return (
     <div className="glass-panel" style={{ padding: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', height: '100%', position: 'relative', overflow: 'hidden' }}>
-      
+
       {/* Background Pulse Effect */}
-      <motion.div 
+      <motion.div
         style={{
           position: 'absolute',
           width: '100%',
@@ -70,26 +70,26 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
       />
 
       <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
-        
+
         <div style={{ position: 'relative', width: '80px', height: '80px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           {status === 'running' || status === 'queued' ? (
-             <motion.div
-               animate={{ rotate: 360 }}
-               transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-             >
-               <Loader2 size={48} color="var(--accent-primary)" />
-             </motion.div>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+            >
+              <Loader2 size={48} color="var(--accent-primary)" />
+            </motion.div>
           ) : status === 'completed' ? (
-             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
-               <CheckCircle2 size={56} color="var(--accent-primary)" />
-             </motion.div>
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+              <CheckCircle2 size={56} color="var(--accent-primary)" />
+            </motion.div>
           ) : null}
 
           {/* Outer Rotating Ring */}
           {(status === 'running' || status === 'queued') && (
-            <motion.svg 
-              width="100" height="100" 
-              viewBox="0 0 100 100" 
+            <motion.svg
+              width="100" height="100"
+              viewBox="0 0 100 100"
               style={{ position: 'absolute', top: '-10px', left: '-10px' }}
               animate={{ rotate: -360 }}
               transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
@@ -104,7 +104,7 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
             STATUS: <span style={{ color: status === 'completed' ? 'var(--accent-primary)' : '#fff', textTransform: 'uppercase' }}>{status}</span>
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
-             {message || "Initializing inference engine..."}
+            {message || "Initializing inference engine..."}
           </p>
         </div>
 

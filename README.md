@@ -11,9 +11,9 @@ Needle In A Haystack 테스트는 다음과 같이 작동합니다.
 3. LLM에게 해당 정보를 찾도록 질문합니다
 4. LLM이 정보를 얼마나 정확하게 찾아내는지 평가합니다
 
-## 🐳 Docker 사용 (권장)
+## 🐳 Docker로 웹 서비스 실행 (권장)
 
-Docker를 사용하면 복잡한 환경 설정 없이 바로 테스트를 시작할 수 있습니다. 특히 그래프 생성 시 **한글 폰트 깨짐 문제를 자동으로 해결**해줍니다.
+Docker Compose를 사용하면 백엔드(FastAPI)와 프론트엔드(React)를 한 번에 실행할 수 있습니다.
 
 ### 1. 환경 변수 설정
 프로젝트 최상단 폴더에 `.env` 파일을 생성하세요.
@@ -24,35 +24,23 @@ GOOGLE_API_KEY=...
 ANTHROPIC_API_KEY=...
 ```
 
-### 2. 테스트 실행
-
-**통합 테스트 실행 (기본)**  
-- Gemini 모델(gemini-2.5-flash-lite + gemini-3-flash-preview)을 사용하여 전체 기능을 빠르게 검증합니다.
+### 2. 서비스 실행
 ```bash
-docker compose run --rm needle-test test
+docker compose up --build
 ```
 
-**특정 모델/옵션으로 직접 실행**  
-- 원하는 모델과 옵션을 지정하여 실행할 수도 있습니다.
-```bash
-# OpenAI GPT-5 테스트
-docker compose run --rm needle-test python needle_test.py --provider openai --model_name gpt-5
+실행 후 `http://localhost:3000` 에 접속하면 **N.I.H. Kor Terminal** 대시보드를 사용할 수 있습니다.
 
-# Gemini 실행
-docker compose run --rm needle-test python needle_test.py --provider gemini --model_name gemini-2.5-flash
-```
-
-### 3. 결과 분석
+### 3. 서비스 종료
 ```bash
-docker compose run --rm needle-test python tools/analyze_results.py
+docker compose down
 ```
-결과는 로컬의 `results_kor/` 및 `analyze_results/` 폴더에 저장됩니다.
 
 ---
 
 ## 📦 로컬 설치 (직접 실행)
 
-Python 환경에서 직접 실행하려면 다음 단계를 따르세요.
+Docker 없이 직접 실행하려면 다음 단계를 따르세요.
 
 ### 1. 패키지 설치
 ```bash
@@ -89,28 +77,20 @@ python tools/setup_check.py
 명령어 기반의 CLI 대신, 브라우저에서 편리하게 테스트 파라미터를 설정하고 실행 결과를 실시간으로 모니터링할 수 있는 UI 대시보드가 제공됩니다.
 
 ### 1. 백엔드(FastAPI) 시작
-프로젝트 최상단 폴더에서 테스트 실행 요청을 수신하고 결과를 처리할 백엔드 서버를 띄웁니다.
+프로젝트 최상단 폴더에서 백엔드 서버를 실행합니다.
 ```bash
-# 관련 패키지 설치 (없는 경우)
-pip install fastapi uvicorn pydantic
-
-# 백엔드 서버 실행
 uvicorn api.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
 ### 2. 프론트엔드(React) 시작
-새로운 터미널 창을 열고 `web` 폴더로 이동하여 프론트엔드 환경을 세팅하고 실행합니다.
+새로운 터미널 창을 열고 `web` 폴더로 이동하여 프론트엔드를 실행합니다.
 ```bash
 cd web
-
-# 관련 패키지 설치
 npm install
-
-# 프론트엔드 서버 실행
 npm run dev
 ```
 
-이제 웹 브라우저를 열고 `http://localhost:5173/` 에 접속하여 직관적이고 멋진 다크 테마 방식의 **N.I.H. Kor Terminal** 대시보드를 바로 사용할 수 있습니다!
+`http://localhost:5173/` 에 접속하여 **N.I.H. Kor Terminal** 대시보드를 사용할 수 있습니다.
 
 ---
 
@@ -264,7 +244,14 @@ python needle_test.py \
 ## 📁 프로젝트 구조
 
 ```
-├── needle_test.py          # 메인 실행 스크립트
+├── needle_test.py          # 메인 실행 스크립트 (CLI)
+├── api/                    # FastAPI 백엔드
+│   ├── main.py             # API 진입점
+│   └── routes/             # API 라우트
+├── web/                    # React 프론트엔드
+│   ├── Dockerfile          # 프론트엔드 Docker 빌드
+│   ├── nginx.conf          # Nginx 프록시 설정
+│   └── src/                # React 소스 코드
 ├── core/                   # 핵심 테스트 로직
 ├── providers/              # LLM 프로바이더
 ├── evaluators/             # 응답 평가자
@@ -278,9 +265,8 @@ python needle_test.py \
 ├── analyze_results/        # 분석 결과 (자동 생성)
 ├── requirements.txt        # Python 의존성
 ├── example.env             # 환경 변수 예시
-├── Dockerfile              # Docker 이미지 빌드 설정
-├── docker-compose.yml      # Docker 실행 설정
-└── entrypoint.sh           # Docker 엔트리포인트
+├── Dockerfile              # 백엔드 Docker 빌드
+└── docker-compose.yml      # Docker Compose 설정
 ```
 
 ## 📚 데이터 출처
