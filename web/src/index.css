@@ -1,22 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
-  /* 다이내믹 컬러 팔레트: 브루탈 리스트 & 사이버 사이파이 믹스 */
-  --bg-dark: #050505;
-  --bg-surface: rgba(20, 20, 22, 0.7);
-  --bg-surface-hover: rgba(30, 30, 35, 0.85);
-  
-  --accent-primary: #00F0B5;
-  --accent-secondary: #F82572;
-  --accent-glow: rgba(0, 240, 181, 0.15);
-  --accent-glow-strong: rgba(0, 240, 181, 0.4);
-  
-  --text-main: #FFFFFF;
-  --text-muted: #888899;
-  
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(0, 240, 181, 0.5);
-  
+  /* 라이트 테마: 에디토리얼 클린 */
+  --bg-dark: #F6F5F0;
+  --bg-surface: rgba(255, 255, 255, 0.92);
+  --bg-surface-hover: rgba(255, 255, 255, 1);
+
+  --accent-primary: #0E7C6B;
+  --accent-secondary: #D94052;
+  --accent-glow: rgba(14, 124, 107, 0.06);
+  --accent-glow-strong: rgba(14, 124, 107, 0.14);
+
+  --text-main: #1C2536;
+  --text-muted: #7D8694;
+
+  --border-glass: rgba(0, 0, 0, 0.07);
+  --border-focus: rgba(14, 124, 107, 0.45);
+
   --radius-lg: 16px;
   --radius-md: 8px;
   --radius-sm: 4px;
@@ -36,11 +36,11 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-  /* 거친 노이즈 텍스처 오버레이 */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: radial-gradient(circle, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* 앰비언트 백그라운드 빛 효과 */
+/* 앰비언트 배경 효과 */
 body::before {
   content: '';
   position: fixed;
@@ -49,8 +49,8 @@ body::before {
   width: 60vw;
   height: 60vw;
   border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(14, 124, 107, 0.04) 0%, transparent 70%);
+  filter: blur(100px);
   z-index: -1;
   pointer-events: none;
 }
@@ -62,8 +62,8 @@ body::after {
   width: 50vw;
   height: 50vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(248, 37, 114, 0.1) 0%, transparent 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(217, 64, 82, 0.03) 0%, transparent 70%);
+  filter: blur(100px);
   z-index: -1;
   pointer-events: none;
 }
@@ -77,16 +77,12 @@ h1, h2, h3, h4 {
   font-family: 'Space Mono', monospace;
 }
 
-/* 글래스모피즘 카드 공통 */
+/* 카드 공통 */
 .glass-panel {
   background: var(--bg-surface);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-glass);
-  border-bottom-color: rgba(255, 255, 255, 0.03);
-  border-right-color: rgba(255, 255, 255, 0.03);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 /* Base Layout */
@@ -111,8 +107,9 @@ header {
 .title-glow {
   font-size: 2.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+  background: linear-gradient(135deg, var(--text-main) 0%, var(--text-muted) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
 }
@@ -127,7 +124,7 @@ header {
   margin-left: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 0 10px var(--accent-glow);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 main {
@@ -143,7 +140,7 @@ main {
   }
 }
 
-/* 폼 컨트롤 스타일 */
+/* 폼 컨트롤 */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -160,7 +157,7 @@ main {
 
 .form-input, .form-select {
   width: 100%;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.02);
   border: 1px solid var(--border-glass);
   color: var(--text-main);
   padding: 0.8rem 1rem;
@@ -173,13 +170,13 @@ main {
 .form-input:focus, .form-select:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 15px var(--accent-glow-strong);
-  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: #fff;
 }
 
 .form-select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888899' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237D8694' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1em;
@@ -188,8 +185,8 @@ main {
 /* 버튼 */
 .btn-primary {
   width: 100%;
-  background: linear-gradient(135deg, var(--accent-primary), #00d2ff);
-  color: #000;
+  background: linear-gradient(135deg, var(--accent-primary), #10B981);
+  color: #fff;
   font-weight: 700;
   border: none;
   padding: 1rem;
@@ -197,7 +194,7 @@ main {
   font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-  box-shadow: 0 4px 15px var(--accent-glow-strong);
+  box-shadow: 0 4px 12px var(--accent-glow-strong);
   position: relative;
   overflow: hidden;
   margin-top: 1rem;
@@ -210,13 +207,13 @@ main {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
   transition: left 0.5s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 240, 181, 0.6);
+  box-shadow: 0 6px 20px rgba(14, 124, 107, 0.35);
 }
 
 .btn-primary:hover::before {
@@ -228,8 +225,8 @@ main {
 }
 
 .btn-primary:disabled {
-  background: #333;
-  color: #666;
+  background: #e2e2e2;
+  color: #999;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -241,21 +238,21 @@ main {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.03);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border-glass);
+  background: rgba(0,0,0,0.12);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: rgba(0,0,0,0.2);
 }
 
 /* === 탭 네비게이션 === */
 .header-nav {
   display: flex;
   gap: 0.25rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 100px;
   padding: 0.25rem;
   border: 1px solid var(--border-glass);
@@ -278,27 +275,25 @@ main {
 }
 
 .nav-tab:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .nav-tab--active {
-  color: #000;
+  color: #fff;
   background: var(--accent-primary);
-  box-shadow: 0 0 15px var(--accent-glow-strong);
+  box-shadow: 0 2px 8px var(--accent-glow-strong);
 }
 
 .nav-tab--active:hover {
-  color: #000;
+  color: #fff;
   background: var(--accent-primary);
 }
-
 
 /* === 이력 컨테이너 === */
 .history-container {
   flex: 1;
 }
-
 
 /* === 이력 목록 === */
 .history-list {
@@ -307,11 +302,10 @@ main {
   gap: 0.6rem;
 }
 
-
 /* === 이력 카드 === */
 .history-card {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
+  background: #fff;
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -319,9 +313,9 @@ main {
 }
 
 .history-card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(0, 0, 0, 0.45);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-color: rgba(0, 0, 0, 0.12);
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .history-card__accent {
@@ -372,7 +366,7 @@ main {
   font-family: 'Outfit', sans-serif;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .history-stat__label {
@@ -387,18 +381,17 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   padding-top: 0.6rem;
 }
-
 
 /* === 이력 태그 === */
 .history-tag {
   font-family: 'Space Mono', monospace;
   font-size: 0.65rem;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   padding: 0.15rem 0.5rem;
   border-radius: 100px;
   letter-spacing: 0.03em;
@@ -406,17 +399,16 @@ main {
 
 .history-tag--accent {
   color: var(--accent-primary);
-  border-color: rgba(0, 240, 181, 0.3);
-  background: rgba(0, 240, 181, 0.06);
+  border-color: rgba(14, 124, 107, 0.2);
+  background: rgba(14, 124, 107, 0.06);
 }
-
 
 /* === 아이콘 버튼 === */
 .btn-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border-glass);
   color: var(--text-muted);
   width: 36px;
@@ -427,9 +419,9 @@ main {
 }
 
 .btn-icon:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-main);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 .btn-icon--sm {
@@ -438,18 +430,17 @@ main {
 }
 
 .btn-icon--danger {
-  color: #f82572;
-  border-color: rgba(248, 37, 114, 0.3);
-  background: rgba(248, 37, 114, 0.08);
+  color: #DC2626;
+  border-color: rgba(220, 38, 38, 0.2);
+  background: rgba(220, 38, 38, 0.04);
 }
 
 .btn-icon--danger:hover {
-  background: rgba(248, 37, 114, 0.2);
-  color: #ff5a93;
+  background: rgba(220, 38, 38, 0.1);
+  color: #B91C1C;
 }
 
-
-/* === 반응형: 이력 카드 === */
+/* === 반응형 === */
 @media (max-width: 768px) {
   .history-card__top {
     flex-direction: column;
@@ -459,7 +450,7 @@ main {
     width: 100%;
     justify-content: space-around;
     padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
   }
 
   .header-nav {

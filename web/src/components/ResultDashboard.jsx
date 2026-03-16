@@ -25,7 +25,7 @@ export default function ResultDashboard({ results, onReset }) {
         <button 
           onClick={onReset}
           className="btn-primary" 
-          style={{ width: 'auto', padding: '0.5rem 1rem', marginTop: 0, background: 'rgba(255,255,255,0.1)', color: '#fff' }}
+          style={{ width: 'auto', padding: '0.5rem 1rem', marginTop: 0, background: 'rgba(0,0,0,0.04)', color: 'var(--text-main)' }}
         >
           <RefreshCw size={16} /> NEW TEST
         </button>
@@ -35,39 +35,39 @@ export default function ResultDashboard({ results, onReset }) {
         
         <motion.div 
           className="glass-panel" 
-          style={{ padding: '1.5rem', background: 'rgba(0, 0, 0, 0.4)', borderLeft: '4px solid var(--accent-primary)' }}
+          style={{ padding: '1.5rem', background: '#fff', borderLeft: '4px solid var(--accent-primary)' }}
           initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
             <Clock size={16} /> <span className="mono" style={{ fontSize: '0.8rem' }}>EXECUTION TIME</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.5rem' }}>
             {time_elapsed.toFixed(1)}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>s</span>
           </div>
         </motion.div>
 
         <motion.div 
           className="glass-panel" 
-          style={{ padding: '1.5rem', background: 'rgba(0, 0, 0, 0.4)', borderLeft: '4px solid var(--accent-primary)' }}
+          style={{ padding: '1.5rem', background: '#fff', borderLeft: '4px solid var(--accent-primary)' }}
           initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
              <Target size={16} /> <span className="mono" style={{ fontSize: '0.8rem' }}>TOTAL METRICS</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.5rem' }}>
             {totalTests}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}> runs</span>
           </div>
         </motion.div>
 
         <motion.div 
           className="glass-panel" 
-          style={{ padding: '1.5rem', background: 'rgba(0, 0, 0, 0.4)', borderLeft: `4px solid ${perfectScores > 0 ? '#00f0b5' : '#f82572'}` }}
+          style={{ padding: '1.5rem', background: '#fff', borderLeft: `4px solid ${perfectScores > 0 ? '#059669' : '#DC2626'}` }}
           initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
              <CheckSquare size={16} /> <span className="mono" style={{ fontSize: '0.8rem' }}>ACCURACY INDEX</span>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: '#fff', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '0.5rem' }}>
             {((perfectScores / totalTests) * 100).toFixed(0)}<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>%</span>
           </div>
         </motion.div>
@@ -80,7 +80,7 @@ export default function ResultDashboard({ results, onReset }) {
         </h3>
         
         <div style={{ 
-          background: 'rgba(0,0,0,0.6)', 
+          background: 'rgba(0,0,0,0.02)', 
           borderRadius: 'var(--radius-md)', 
           padding: '1rem',
           maxHeight: '400px',
@@ -99,19 +99,19 @@ export default function ResultDashboard({ results, onReset }) {
                   display: 'flex', 
                   justifyContent: 'space-between',
                   padding: '0.8rem', 
-                  borderBottom: idx === dataArray.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)'
+                  borderBottom: idx === dataArray.length - 1 ? 'none' : '1px solid rgba(0,0,0,0.06)'
                 }}
              >
                 <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-muted)' }}>
                   <span style={{ width: '30px' }}>#{idx+1}</span>
-                  <span style={{ width: '100px', color: '#fff' }}>Len: {r.context_length}</span>
-                  <span style={{ width: '80px', color: '#fff' }}>Dep: {r.depth_percent}%</span>
+                  <span style={{ width: '100px', color: 'var(--text-main)' }}>Len: {r.context_length}</span>
+                  <span style={{ width: '80px', color: 'var(--text-main)' }}>Dep: {r.depth_percent}%</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: '60px', textAlign: 'right', color: r.score >= 10 ? '#00f0b5' : (r.score >= 5 ? '#f5a623' : '#f82572') }}>
+                  <span style={{ width: '60px', textAlign: 'right', color: r.score >= 10 ? '#059669' : (r.score >= 5 ? '#D97706' : '#DC2626') }}>
                     Score: {r.score}
                   </span>
-                  {r.score >= 10 ? <CheckSquare size={14} color="#00f0b5" /> : <XSquare size={14} color="#f82572" />}
+                  {r.score >= 10 ? <CheckSquare size={14} color="#059669" /> : <XSquare size={14} color="#DC2626" />}
                 </div>
              </motion.div>
           ))}

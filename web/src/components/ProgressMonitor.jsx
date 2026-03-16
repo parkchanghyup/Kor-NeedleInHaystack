@@ -62,7 +62,7 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
           position: 'absolute',
           width: '100%',
           height: '100%',
-          background: 'radial-gradient(circle, rgba(0, 240, 181, 0.05) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(14, 124, 107, 0.04) 0%, transparent 70%)',
           zIndex: 0
         }}
         animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
@@ -101,7 +101,7 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
 
         <div style={{ textAlign: 'center' }}>
           <h2 className="mono" style={{ fontSize: '1.5rem', marginBottom: '0.5rem', letterSpacing: '0.1em' }}>
-            STATUS: <span style={{ color: status === 'completed' ? 'var(--accent-primary)' : '#fff', textTransform: 'uppercase' }}>{status}</span>
+            STATUS: <span style={{ color: status === 'completed' ? 'var(--accent-primary)' : 'var(--text-main)', textTransform: 'uppercase' }}>{status}</span>
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
             {message || "Initializing inference engine..."}

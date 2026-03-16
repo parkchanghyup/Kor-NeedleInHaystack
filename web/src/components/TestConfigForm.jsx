@@ -171,7 +171,7 @@ export default function TestConfigForm({ onStart, isPending }) {
        {/* 3. Document Depth Range */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
         <fieldset style={{ border: 'none', marginBottom: '1rem' }}>
-          <legend className="mono" style={{ color: '#fff', marginBottom: '1rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem', width: '100%' }}>
+          <legend className="mono" style={{ color: 'var(--text-main)', marginBottom: '1rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem', width: '100%' }}>
             [3.0] DOCUMENT DEPTH RANGE
           </legend>
           <div className="form-group">

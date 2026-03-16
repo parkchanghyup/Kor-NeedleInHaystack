@@ -88,7 +88,7 @@ function App() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
                 <FileText size={20} color="var(--accent-secondary)" />
-                <h2 style={{ fontSize: '1.2rem', color: '#fff' }}>Test Parameters</h2>
+                <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>Test Parameters</h2>
               </div>
 
               <TestConfigForm
@@ -140,7 +140,7 @@ function App() {
                   >
                     <h3 style={{ color: 'var(--accent-secondary)', marginBottom: '1rem' }}>Test Execution Failed</h3>
                     <p className="mono">{taskMessage}</p>
-                    <button onClick={resetTest} className="btn-primary" style={{ marginTop: '2rem', background: '#333', color: '#fff' }}>
+                    <button onClick={resetTest} className="btn-primary" style={{ marginTop: '2rem', background: 'rgba(0,0,0,0.06)', color: 'var(--text-main)' }}>
                       Reset & Try Again
                     </button>
                   </motion.div>
