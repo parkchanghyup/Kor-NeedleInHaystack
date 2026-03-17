@@ -56,6 +56,7 @@ HISTORY_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "history"
 HISTORY_DIR.mkdir(parents=True, exist_ok=True)
 
 KST = timezone(timedelta(hours=9))
+DEFAULT_MULTI_NEEDLES = [item["needle"] for item in LLMNeedleHaystackTesterKor.load_needle_configs()]
 
 class TestRunRequest(BaseModel):
     provider: str = Field(default="openai")
@@ -138,6 +139,15 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
         tasks_store[task_id]["status"] = "running"
         tasks_store[task_id]["message"] = "테스트 초기화 중..."
 
+        def update_progress(progress_data: Dict[str, Any]):
+            tasks_store[task_id]["progress"] = progress_data.get("progress_percent", 0.0)
+            tasks_store[task_id]["completed_tests"] = progress_data.get("completed_tests", 0)
+            tasks_store[task_id]["total_tests"] = progress_data.get("total_tests", 0)
+            tasks_store[task_id]["current_context_length"] = progress_data.get("current_context_length")
+            tasks_store[task_id]["current_depth_percent"] = progress_data.get("current_depth_percent")
+            if progress_data.get("message"):
+                tasks_store[task_id]["message"] = progress_data["message"]
+
         model_to_test = get_model_provider(req.provider, req.model_name)
         evaluation_model = get_evaluator_instance(req.evaluator, req.evaluator_model_name)
 
@@ -153,6 +163,7 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
             "print_ongoing_status": False,
             "save_results": False,  # 웹 환경에서는 data/history에 별도 저장하므로 results_kor 저장 불필요
             "save_contexts": False, # 웹 환경에서는 용량 고려하여 False 기본값
+            "progress_callback": update_progress,
         }
 
         tasks_store[task_id]["message"] = "테스트 실행 중..."
@@ -160,7 +171,7 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
         start_time = time.time()
         
         if req.multi_needle:
-            tester = LLMMultiNeedleHaystackTesterKor(**tester_kwargs)
+            tester = LLMMultiNeedleHaystackTesterKor(needles=DEFAULT_MULTI_NEEDLES, **tester_kwargs)
         else:
             tester = LLMNeedleHaystackTesterKor(**tester_kwargs)
             tester.evaluation_model.true_answer = tester.needle
@@ -174,6 +185,9 @@ async def run_tester_job(task_id: str, req: TestRunRequest):
         
         tasks_store[task_id]["status"] = "completed"
         tasks_store[task_id]["message"] = "테스트가 완료되었습니다."
+        tasks_store[task_id]["progress"] = 100.0
+        tasks_store[task_id]["completed_tests"] = tester.total_tests
+        tasks_store[task_id]["total_tests"] = tester.total_tests
         tasks_store[task_id]["detailed_results"] = results
         tasks_store[task_id]["time_elapsed"] = elapsed
         
@@ -198,12 +212,22 @@ async def run_test(req: TestRunRequest, background_tasks: BackgroundTasks):
         "status": "queued",
         "message": "작업 예약됨",
         "detailed_results": None,
-        "time_elapsed": 0.0
+        "time_elapsed": 0.0,
+        "progress": 0.0,
+        "completed_tests": 0,
+        "total_tests": req.context_lengths_num_intervals * req.document_depth_percent_intervals,
+        "current_context_length": None,
+        "current_depth_percent": None,
     }
     
     background_tasks.add_task(run_tester_job, task_id, req)
     
-    return {"task_id": task_id, "status": "queued"}
+    return {
+        "task_id": task_id,
+        "status": "queued",
+        "total_tests": tasks_store[task_id]["total_tests"],
+        "needle_count": len(DEFAULT_MULTI_NEEDLES) if req.multi_needle else 1,
+    }
 
 @router.get("/status/{task_id}")
 async def get_test_status(task_id: str):
@@ -218,6 +242,11 @@ async def get_test_status(task_id: str):
         "task_id": task_id,
         "status": task["status"],
         "message": task["message"],
+        "progress": task.get("progress", 0.0),
+        "completed_tests": task.get("completed_tests", 0),
+        "total_tests": task.get("total_tests", 0),
+        "current_context_length": task.get("current_context_length"),
+        "current_depth_percent": task.get("current_depth_percent"),
     }
 
 @router.get("/results/{task_id}")

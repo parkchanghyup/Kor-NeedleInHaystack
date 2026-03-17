@@ -1,8 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function ProgressMonitor({ taskId, status, setStatus, setMessage, setResults, message }) {
+  const [progress, setProgress] = useState(0);
+  const [completedTests, setCompletedTests] = useState(0);
+  const [totalTests, setTotalTests] = useState(0);
+  const [currentContextLength, setCurrentContextLength] = useState(null);
+  const [currentDepthPercent, setCurrentDepthPercent] = useState(null);
 
   useEffect(() => {
     let intervalId;
@@ -16,6 +21,11 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
         const data = await res.json();
         setStatus(data.status);
         setMessage(data.message);
+        setProgress(data.progress ?? 0);
+        setCompletedTests(data.completed_tests ?? 0);
+        setTotalTests(data.total_tests ?? 0);
+        setCurrentContextLength(data.current_context_length ?? null);
+        setCurrentDepthPercent(data.current_depth_percent ?? null);
 
         // 작업이 완료되었거나 실패한 경우 폴링 중단 및 결과 fetch 시도
         if (data.status === 'completed' || data.status === 'failed') {
@@ -101,15 +111,40 @@ export default function ProgressMonitor({ taskId, status, setStatus, setMessage,
 
         <div style={{ textAlign: 'center' }}>
           <h2 className="mono" style={{ fontSize: '1.5rem', marginBottom: '0.5rem', letterSpacing: '0.1em' }}>
-            STATUS: <span style={{ color: status === 'completed' ? 'var(--accent-primary)' : 'var(--text-main)', textTransform: 'uppercase' }}>{status}</span>
+            진행 상태: <span style={{ color: status === 'completed' ? 'var(--accent-primary)' : 'var(--text-main)' }}>
+              {status === 'queued' ? '대기 중' : status === 'running' ? '실행 중' : status === 'completed' ? '완료' : status}
+            </span>
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
-            {message || "Initializing inference engine..."}
+            {message || '테스트 환경을 준비하고 있습니다.'}
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-          <span className="title-badge" style={{ margin: 0 }}>TASK ID: {taskId.split('-')[0]}...</span>
+        <div className="progress-card">
+          <div className="progress-card__top">
+            <span className="progress-card__label">전체 진행률</span>
+            <strong className="progress-card__value">{Math.round(progress)}%</strong>
+          </div>
+          <div className="progress-track">
+            <motion.div
+              className="progress-fill"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+            />
+          </div>
+          <div className="progress-meta">
+            <span>{completedTests} / {totalTests || '?' } 테스트 완료</span>
+            {currentContextLength && currentDepthPercent !== null ? (
+              <span>현재 조합: {currentContextLength.toLocaleString()} 토큰, 깊이 {Math.round(currentDepthPercent)}%</span>
+            ) : (
+              <span>현재 조합을 계산 중입니다.</span>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem' }}>
+          <span className="title-badge" style={{ margin: 0 }}>작업 ID: {taskId.split('-')[0]}...</span>
         </div>
       </div>
     </div>

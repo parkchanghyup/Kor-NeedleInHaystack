@@ -114,6 +114,13 @@ header {
   display: inline-block;
 }
 
+.header-copy {
+  margin-top: 0.6rem;
+  max-width: 700px;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
 .title-badge {
   font-family: 'Space Mono', monospace;
   font-size: 0.75rem;
@@ -145,14 +152,176 @@ main {
   margin-bottom: 1.5rem;
 }
 
+.config-section {
+  position: relative;
+  min-inline-size: 0;
+  margin: 0 0 1rem;
+  overflow: hidden;
+  border: 1px solid var(--border-glass);
+  border-radius: 18px;
+  padding: 1.25rem 1.25rem 1.35rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.76));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 10px 24px rgba(28, 37, 54, 0.05);
+}
+
+.config-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  border-radius: inherit;
+  background-repeat: no-repeat;
+  background-position: top left;
+  background-size: 100% 2px;
+  pointer-events: none;
+}
+
+.config-section--primary::before {
+  background: linear-gradient(90deg, var(--accent-primary), rgba(14, 124, 107, 0.2));
+}
+
+.config-section--secondary::before {
+  background: linear-gradient(90deg, var(--accent-secondary), rgba(217, 64, 82, 0.2));
+}
+
+.config-section--neutral::before {
+  background: linear-gradient(90deg, var(--text-main), rgba(28, 37, 54, 0.15));
+}
+
+.section-header {
+  margin-bottom: 1.25rem;
+}
+
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.section-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.section-title {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 0;
+  padding: 0.15rem 0;
+  width: auto;
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+}
+
+.section-title--primary {
+  color: var(--accent-primary);
+}
+
+.section-title--secondary {
+  color: var(--accent-secondary);
+}
+
+.section-title--neutral {
+  color: var(--text-main);
+}
+
+.section-description {
+  color: var(--text-main);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin-top: 0.35rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.section-body {
+  padding-top: 0.3rem;
+}
+
 .form-label {
   display: block;
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.02em;
+}
+
+.label-with-help {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.help-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.help-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.help-tooltip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  transform: translateY(0);
+  min-width: 190px;
+  max-width: 260px;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: var(--text-main);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  white-space: normal;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 20;
+}
+
+.help-wrap:hover .help-tooltip,
+.help-wrap:focus .help-tooltip,
+.help-wrap:focus-visible .help-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-2px);
 }
 
 .form-input, .form-select {
@@ -180,6 +349,64 @@ main {
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1em;
+}
+
+.range-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.mode-card,
+.estimate-card,
+.progress-card {
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mode-card {
+  padding: 1rem 1rem 1.1rem;
+  margin-top: 0.25rem;
+}
+
+.mode-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.mode-copy {
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.estimate-card {
+  display: grid;
+  gap: 0.2rem;
+  padding: 1rem 1.1rem;
+  margin-top: 1.25rem;
+}
+
+.estimate-card__label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.estimate-card__value {
+  font-size: 1.4rem;
+  color: var(--text-main);
+}
+
+.estimate-card__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 /* 버튼 */
@@ -293,6 +520,56 @@ main {
 /* === 이력 컨테이너 === */
 .history-container {
   flex: 1;
+}
+
+.progress-card {
+  width: min(440px, 100%);
+  padding: 1rem 1rem 1.1rem;
+}
+
+.progress-card__top,
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.progress-card__top {
+  align-items: baseline;
+  margin-bottom: 0.7rem;
+}
+
+.progress-card__label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.progress-card__value {
+  font-family: 'Space Mono', monospace;
+  color: var(--text-main);
+  font-size: 1.2rem;
+}
+
+.progress-track {
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-primary), #10B981);
+  box-shadow: 0 0 14px rgba(14, 124, 107, 0.2);
+}
+
+.progress-meta {
+  margin-top: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
 /* === 이력 목록 === */
@@ -442,6 +719,30 @@ main {
 
 /* === 반응형 === */
 @media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .range-grid,
+  .progress-card__top,
+  .progress-meta {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .config-section {
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  .help-tooltip {
+    left: auto;
+    right: 0;
+    min-width: 170px;
+    max-width: min(240px, calc(100vw - 80px));
+  }
+
   .history-card__top {
     flex-direction: column;
   }

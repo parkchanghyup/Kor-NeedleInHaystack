@@ -108,6 +108,7 @@ class LLMNeedleHaystackTesterKor:
                  final_context_length_buffer: int = 200,
                  seconds_to_sleep_between_completions: Optional[float] = None,
                  print_ongoing_status: bool = True,
+                 progress_callback=None,
                  **kwargs):
         """
         한국어 버전 Needle Haystack Tester 초기화
@@ -160,6 +161,7 @@ class LLMNeedleHaystackTesterKor:
         self.save_contexts = save_contexts
         self.seconds_to_sleep_between_completions = seconds_to_sleep_between_completions
         self.print_ongoing_status = print_ongoing_status
+        self.progress_callback = progress_callback
         self.testing_results = []
 
         if context_lengths is None:
@@ -190,6 +192,27 @@ class LLMNeedleHaystackTesterKor:
         self.model_name = self.model_to_test.model_name
         
         self.evaluation_model = evaluation_model if evaluation_model is not None else evaluator
+        self.total_tests = len(self.context_lengths) * len(self.document_depth_percents)
+        self.completed_tests = 0
+
+    def notify_progress(self, stage: str, context_length: Optional[int] = None, depth_percent: Optional[float] = None, message: Optional[str] = None) -> None:
+        """웹 UI용 진행 상태를 외부 콜백으로 전달합니다."""
+        if not self.progress_callback:
+            return
+
+        progress = 0.0
+        if self.total_tests > 0:
+            progress = round((self.completed_tests / self.total_tests) * 100, 1)
+
+        self.progress_callback({
+            "stage": stage,
+            "completed_tests": self.completed_tests,
+            "total_tests": self.total_tests,
+            "progress_percent": progress,
+            "current_context_length": int(context_length) if context_length is not None else None,
+            "current_depth_percent": float(depth_percent) if depth_percent is not None else None,
+            "message": message,
+        })
 
     def logistic(self, x: float, L: int = 100, x0: int = 50, k: float = .1) -> float:
         """로지스틱 함수를 사용하여 값을 변환합니다."""
@@ -208,6 +231,7 @@ class LLMNeedleHaystackTesterKor:
 
     async def run_test(self):
         sem = Semaphore(self.num_concurrent_requests)
+        self.notify_progress("preparing", message="테스트 조합을 준비하고 있습니다.")
 
         # 각 context_lengths와 depths의 반복을 실행
         tasks = []
@@ -225,6 +249,13 @@ class LLMNeedleHaystackTesterKor:
         if self.save_results:
             if self.result_exists(context_length, depth_percent):
                 return
+
+        self.notify_progress(
+            "running",
+            context_length=context_length,
+            depth_percent=depth_percent,
+            message=f"{self.completed_tests + 1}/{self.total_tests} 테스트 실행 중"
+        )
 
         # 필요한 길이의 컨텍스트를 생성하고 needle 문장을 배치
         context = await self.generate_context(context_length, depth_percent)
@@ -257,6 +288,13 @@ class LLMNeedleHaystackTesterKor:
         }
 
         self.testing_results.append(results)
+        self.completed_tests += 1
+        self.notify_progress(
+            "running",
+            context_length=context_length,
+            depth_percent=depth_percent,
+            message=f"{self.completed_tests}/{self.total_tests} 테스트 완료"
+        )
 
         if self.print_ongoing_status:
             print (f"-- 테스트 요약 -- ")

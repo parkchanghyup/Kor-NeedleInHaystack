@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Database, Zap, FileText, Clock, Play } from 'lucide-react';
+import { Activity, FileText, Clock, Play } from 'lucide-react';
 import TestConfigForm from './components/TestConfigForm';
 import ProgressMonitor from './components/ProgressMonitor';
 import ResultDashboard from './components/ResultDashboard';
@@ -25,11 +25,16 @@ function App() {
       const data = await response.json();
       if (data.task_id) {
         setTaskId(data.task_id);
+        setTaskMessage(
+          data.needle_count > 1
+            ? `총 ${data.total_tests}개 조합을 검사합니다. 문서마다 ${data.needle_count}개의 needle이 함께 삽입됩니다.`
+            : `총 ${data.total_tests}개 조합을 검사합니다.`
+        );
       }
     } catch (error) {
       console.error('API Error:', error);
       setTaskStatus('failed');
-      setTaskMessage('Failed to connect to the backend server.');
+      setTaskMessage('백엔드 서버에 연결하지 못했습니다.');
     }
   };
 
@@ -45,7 +50,7 @@ function App() {
       <header>
         <div>
           <h1 className="title-glow">N.I.H. Kor</h1>
-          <span className="title-badge">Terminal v1.0</span>
+          <p className="header-copy">긴 문서 속 숨겨진 정보를 모델이 얼마나 잘 찾아내는지 확인하는 Needle In A Haystack 테스트 도구</p>
         </div>
 
         {/* 탭 네비게이션 */}
@@ -56,7 +61,7 @@ function App() {
             whileTap={{ scale: 0.97 }}
           >
             <Play size={16} />
-            <span>TEST</span>
+            <span>테스트</span>
           </motion.button>
           <motion.button
             className={`nav-tab ${activeTab === 'history' ? 'nav-tab--active' : ''}`}
@@ -64,7 +69,7 @@ function App() {
             whileTap={{ scale: 0.97 }}
           >
             <Clock size={16} />
-            <span>HISTORY</span>
+            <span>이력</span>
           </motion.button>
         </nav>
       </header>
@@ -88,7 +93,7 @@ function App() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
                 <FileText size={20} color="var(--accent-secondary)" />
-                <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>Test Parameters</h2>
+                <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>테스트 설정</h2>
               </div>
 
               <TestConfigForm
@@ -138,10 +143,10 @@ function App() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                   >
-                    <h3 style={{ color: 'var(--accent-secondary)', marginBottom: '1rem' }}>Test Execution Failed</h3>
+                    <h3 style={{ color: 'var(--accent-secondary)', marginBottom: '1rem' }}>테스트 실행 실패</h3>
                     <p className="mono">{taskMessage}</p>
                     <button onClick={resetTest} className="btn-primary" style={{ marginTop: '2rem', background: 'rgba(0,0,0,0.06)', color: 'var(--text-main)' }}>
-                      Reset & Try Again
+                      초기화 후 다시 시도
                     </button>
                   </motion.div>
                 )}
@@ -165,7 +170,7 @@ function App() {
                   >
                     <Activity size={48} strokeWidth={1} style={{ marginBottom: '1rem', color: 'var(--text-muted)' }} />
                     <p className="mono" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                      AWAITING TEST INITIALIZATION...
+                      테스트 시작을 기다리고 있습니다.
                     </p>
                   </motion.div>
                 )}

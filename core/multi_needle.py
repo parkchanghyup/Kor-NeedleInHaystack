@@ -190,6 +190,13 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
                     print("결과가 이미 존재합니다. 건너뜁니다.")
                 return
 
+        self.notify_progress(
+            "running",
+            context_length=context_length,
+            depth_percent=depth_percent,
+            message=f"{self.completed_tests + 1}/{self.total_tests} 테스트 실행 중"
+        )
+
         # 필요한 길이의 컨텍스트를 생성하고 needle 문장 배치
         context = await self.generate_context(context_length, depth_percent)
 
@@ -222,6 +229,13 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
         }
 
         self.testing_results.append(results)
+        self.completed_tests += 1
+        self.notify_progress(
+            "running",
+            context_length=context_length,
+            depth_percent=depth_percent,
+            message=f"{self.completed_tests}/{self.total_tests} 테스트 완료"
+        )
 
         if self.print_ongoing_status:
             print ("-- 테스트 요약 -- ")
@@ -258,6 +272,7 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
 
     async def run_test(self):
         sem = Semaphore(self.num_concurrent_requests)
+        self.notify_progress("preparing", message="다중 needle 테스트 조합을 준비하고 있습니다.")
 
         # 각 context_lengths와 depths의 반복을 실행
         tasks = []
