@@ -6,6 +6,7 @@ export default function ResultDashboard({ results, onReset }) {
 
   const { time_elapsed, results: dataArray } = results;
   const totalTests = dataArray.length;
+  const modelErrorCount = dataArray.filter(r => r.is_model_error).length;
   
   // 성공 여부 기준 단순 집계
   const perfectScores = dataArray.filter(r => r.score >= 10).length;
@@ -75,6 +76,19 @@ export default function ResultDashboard({ results, onReset }) {
       </div>
 
       <div style={{ marginTop: '1rem' }}>
+        {modelErrorCount > 0 && (
+          <div style={{
+            marginBottom: '0.75rem',
+            padding: '0.6rem 0.8rem',
+            border: '1px solid rgba(220, 38, 38, 0.2)',
+            background: 'rgba(220, 38, 38, 0.06)',
+            color: '#B91C1C',
+            borderRadius: '8px',
+            fontSize: '0.82rem'
+          }}>
+            모델 응답 에러 {modelErrorCount}건이 발생했습니다. 해당 항목은 점수와 별도로 확인하세요.
+          </div>
+        )}
         <h3 className="mono" style={{ fontSize: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.5rem' }}>
           RAW DATA OUTPUT
         </h3>
@@ -108,9 +122,21 @@ export default function ResultDashboard({ results, onReset }) {
                   <span style={{ width: '80px', color: 'var(--text-main)' }}>Dep: {r.depth_percent}%</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ width: '60px', textAlign: 'right', color: r.score >= 10 ? '#059669' : (r.score >= 5 ? '#D97706' : '#DC2626') }}>
+                  <span style={{ width: '100px', textAlign: 'right', color: r.score >= 10 ? '#059669' : (r.score >= 5 ? '#D97706' : '#DC2626') }}>
                     Score: {r.score}
                   </span>
+                  {r.is_model_error && (
+                    <span style={{
+                      fontSize: '0.72rem',
+                      padding: '0.12rem 0.4rem',
+                      borderRadius: '999px',
+                      background: 'rgba(220, 38, 38, 0.12)',
+                      color: '#B91C1C',
+                      border: '1px solid rgba(220, 38, 38, 0.25)'
+                    }}>
+                      모델 에러
+                    </span>
+                  )}
                   {r.score >= 10 ? <CheckSquare size={14} color="#059669" /> : <XSquare size={14} color="#DC2626" />}
                 </div>
              </motion.div>

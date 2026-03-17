@@ -208,6 +208,9 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
         # 모델이 랜덤 사실을 추출하는 질문에 답할 수 있는지 확인
         response = await self.model_to_test.evaluate_model(prompt)
         
+        is_model_error = isinstance(response, str) and response.startswith("Error:")
+        error_message = response[len("Error:"):].strip() if is_model_error else None
+
         # 응답을 배치한 실제 needle과 비교
         score = self.evaluation_model.evaluate_response(response)
 
@@ -223,6 +226,8 @@ class LLMMultiNeedleHaystackTesterKor(LLMNeedleHaystackTesterKor):
             'needles' : self.needles,  # multi_needle에서는 복수형 사용
             'needles_insertion_positions' : self.insertion_percentages,  # needle 삽입 위치 추가
             'model_response' : response,
+            'is_model_error' : is_model_error,
+            'error_message' : error_message,
             'score' : score,
             'test_duration_seconds' : test_elapsed_time,
             'test_timestamp_utc' : datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S%z')
