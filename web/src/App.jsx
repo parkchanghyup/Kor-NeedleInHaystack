@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, FileText, Clock, Play } from 'lucide-react';
 import TestConfigForm from './components/TestConfigForm';
@@ -12,10 +12,19 @@ function App() {
   const [taskStatus, setTaskStatus] = useState('idle'); // idle, queued, running, completed, failed
   const [taskMessage, setTaskMessage] = useState('');
   const [testResults, setTestResults] = useState(null);
+  const scrollLockRef = useRef(null);
 
   const handleStartTest = async (config) => {
+    scrollLockRef.current = window.scrollY;
+
     try {
       setTaskStatus('queued');
+      requestAnimationFrame(() => {
+        if (scrollLockRef.current !== null) {
+          window.scrollTo({ top: scrollLockRef.current, behavior: 'auto' });
+        }
+      });
+
       const response = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/test/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,6 +64,11 @@ function App() {
 
         {/* 탭 네비게이션 */}
         <nav className="header-nav">
+          <motion.div
+            className="nav-tab-indicator"
+            animate={{ x: activeTab === 'test' ? '0%' : '100%' }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+          />
           <motion.button
             className={`nav-tab ${activeTab === 'test' ? 'nav-tab--active' : ''}`}
             onClick={() => setActiveTab('test')}

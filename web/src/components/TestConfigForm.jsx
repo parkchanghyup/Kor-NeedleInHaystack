@@ -1,8 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Play } from 'lucide-react';
 
 const DEFAULT_MULTI_NEEDLE_COUNT = 5;
+const TOOLTIP_GAP = 8;
+const TOOLTIP_VIEWPORT_PADDING = 12;
+const TOOLTIP_MIN_WIDTH = 120;
+const TOOLTIP_MAX_WIDTH = 260;
 
 function SectionHeader({ title, tone, isOpen, onToggle, summary }) {
   return (
@@ -16,14 +21,103 @@ function SectionHeader({ title, tone, isOpen, onToggle, summary }) {
   );
 }
 
+function HelpIconTooltip({ label, help }) {
+  const triggerRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [tooltipStyle, setTooltipStyle] = useState({
+    left: 0,
+    top: 0,
+    width: TOOLTIP_MAX_WIDTH,
+    placement: 'bottom',
+  });
+
+  const updateTooltipPosition = () => {
+    if (!triggerRef.current) {
+      return;
+    }
+
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const availableWidth = Math.max(120, viewportWidth - TOOLTIP_VIEWPORT_PADDING * 2);
+    const contentBasedWidth = Math.round(help.length * 7.4 + 24);
+    const tooltipWidth = Math.min(
+      availableWidth,
+      Math.min(TOOLTIP_MAX_WIDTH, Math.max(TOOLTIP_MIN_WIDTH, contentBasedWidth))
+    );
+
+    const halfWidth = tooltipWidth / 2;
+    const minCenter = TOOLTIP_VIEWPORT_PADDING + halfWidth;
+    const maxCenter = viewportWidth - TOOLTIP_VIEWPORT_PADDING - halfWidth;
+    const centerX = Math.min(maxCenter, Math.max(minCenter, triggerRect.left + triggerRect.width / 2));
+
+    const estimatedHeight = 64;
+    const canOpenBelow = triggerRect.bottom + TOOLTIP_GAP + estimatedHeight <= viewportHeight - TOOLTIP_VIEWPORT_PADDING;
+    const canOpenAbove = triggerRect.top - TOOLTIP_GAP - estimatedHeight >= TOOLTIP_VIEWPORT_PADDING;
+    const placement = canOpenBelow || !canOpenAbove ? 'bottom' : 'top';
+    const top = placement === 'bottom'
+      ? triggerRect.bottom + TOOLTIP_GAP
+      : triggerRect.top - TOOLTIP_GAP;
+
+    setTooltipStyle({
+      left: centerX,
+      top,
+      width: tooltipWidth,
+      placement,
+    });
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    updateTooltipPosition();
+
+    const handleReposition = () => {
+      updateTooltipPosition();
+    };
+
+    window.addEventListener('resize', handleReposition);
+    window.addEventListener('scroll', handleReposition, true);
+
+    return () => {
+      window.removeEventListener('resize', handleReposition);
+      window.removeEventListener('scroll', handleReposition, true);
+    };
+  }, [isOpen]);
+
+  return (
+    <span
+      ref={triggerRef}
+      className="help-wrap"
+      tabIndex={0}
+      role="note"
+      aria-label={`${label} 도움말`}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+      onFocus={() => setIsOpen(true)}
+      onBlur={() => setIsOpen(false)}
+    >
+      <span className="help-dot">?</span>
+      {isOpen && createPortal(
+        <span
+          className={`help-tooltip help-tooltip--portal help-tooltip--${tooltipStyle.placement}`}
+          style={{ left: `${tooltipStyle.left}px`, top: `${tooltipStyle.top}px`, width: `${tooltipStyle.width}px` }}
+        >
+          {help}
+        </span>,
+        document.body
+      )}
+    </span>
+  );
+}
+
 function LabelWithHelp({ htmlFor, label, help }) {
   return (
     <label className="form-label label-with-help" htmlFor={htmlFor}>
       <span>{label}</span>
-      <span className="help-wrap" tabIndex={0} role="note" aria-label={`${label} 도움말`}>
-        <span className="help-dot">?</span>
-        <span className="help-tooltip">{help}</span>
-      </span>
+      <HelpIconTooltip label={label} help={help} />
     </label>
   );
 }
@@ -47,8 +141,21 @@ export default function TestConfigForm({ onStart, isPending }) {
     context: true,
     depth: true,
   });
+  const wasPendingRef = useRef(false);
 
   const expectedTests = config.context_lengths_num_intervals * config.document_depth_percent_intervals;
+
+  useEffect(() => {
+    if (isPending && !wasPendingRef.current) {
+      setOpenSections({
+        provider: false,
+        context: false,
+        depth: false,
+      });
+    }
+
+    wasPendingRef.current = isPending;
+  }, [isPending]);
 
   const toggleSection = (key) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -79,7 +186,16 @@ export default function TestConfigForm({ onStart, isPending }) {
             summary="테스트 모델과 평가 모델을 선택합니다."
           />
 
-          {openSections.provider && (
+          <motion.div
+            className="section-collapse"
+            initial={false}
+            animate={openSections.provider ? 'open' : 'collapsed'}
+            variants={{
+              open: { height: 'auto', opacity: 1 },
+              collapsed: { height: 0, opacity: 0 }
+            }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="section-body">
               <div className="form-group">
                 <LabelWithHelp htmlFor="provider" label="테스트 대상 프로바이더" help="실제 성능을 측정할 모델 제공사입니다." />
@@ -155,16 +271,16 @@ export default function TestConfigForm({ onStart, isPending }) {
                   />
                   <span className="form-label label-with-help" style={{ margin: 0, color: config.multi_needle ? 'var(--accent-primary)' : 'var(--text-main)' }}>
                     <span>멀티 needle 테스트 사용</span>
-                    <span className="help-wrap" tabIndex={0} role="note" aria-label="멀티 needle 도움말">
-                      <span className="help-dot">?</span>
-                      <span className="help-tooltip">현재 기본값으로 한 문서에 {DEFAULT_MULTI_NEEDLE_COUNT}개 needle을 함께 넣어 테스트합니다.</span>
-                    </span>
+                    <HelpIconTooltip
+                      label="멀티 needle"
+                      help={`현재 기본값으로 한 문서에 ${DEFAULT_MULTI_NEEDLE_COUNT}개 needle을 함께 넣어 테스트합니다.`}
+                    />
                   </span>
                 </label>
                 <p className="mode-copy">needle 여러 개를 동시에 찾는 시나리오를 검사합니다.</p>
               </div>
             </div>
-          )}
+          </motion.div>
         </fieldset>
       </motion.div>
 
@@ -178,7 +294,16 @@ export default function TestConfigForm({ onStart, isPending }) {
             summary="문서 길이 범위를 설정합니다."
           />
 
-          {openSections.context && (
+          <motion.div
+            className="section-collapse"
+            initial={false}
+            animate={openSections.context ? 'open' : 'collapsed'}
+            variants={{
+              open: { height: 'auto', opacity: 1 },
+              collapsed: { height: 0, opacity: 0 }
+            }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="section-body">
               <div className="range-grid">
                 <div className="form-group">
@@ -222,7 +347,7 @@ export default function TestConfigForm({ onStart, isPending }) {
                 />
               </div>
             </div>
-          )}
+          </motion.div>
         </fieldset>
       </motion.div>
 
@@ -236,7 +361,16 @@ export default function TestConfigForm({ onStart, isPending }) {
             summary="needle 삽입 위치 범위를 설정합니다."
           />
 
-          {openSections.depth && (
+          <motion.div
+            className="section-collapse"
+            initial={false}
+            animate={openSections.depth ? 'open' : 'collapsed'}
+            variants={{
+              open: { height: 'auto', opacity: 1 },
+              collapsed: { height: 0, opacity: 0 }
+            }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="section-body">
               <div className="range-grid">
                 <div className="form-group">
@@ -284,7 +418,7 @@ export default function TestConfigForm({ onStart, isPending }) {
                 />
               </div>
             </div>
-          )}
+          </motion.div>
         </fieldset>
       </motion.div>
 
